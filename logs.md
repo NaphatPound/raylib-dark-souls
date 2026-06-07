@@ -273,3 +273,21 @@ slider quantization.
   sword + flickering additive flames) ignites at a fixed spot; walking within range +
   `E` = rest -> `g_save.beaten[g_level]=true; save_write()` -> back to the menu. The
   VICTORY screen text now points at the bonfire instead of an instant restart.
+
+## 4th level — Sunken Colosseum (genuinely new geometry, not a recolor)
+
+User feedback: the frozen/forge levels were "only colour changes" of the same
+`boss_arena.glb` monolith field — they wanted a level with a different *layout*.
+
+- **`LEVEL_COLOSSEUM`** (`colosseum`/`pit` arg, `NUM_LEVELS`→4): an ENCLOSED amphitheater
+  built **procedurally** (`arena.cpp` `draw_colosseum`) — it does NOT draw `boss_arena.glb`
+  at all. Six concentric **stepped wall tiers** (rings of lit cubes, gateway gaps at the
+  four cardinals), four **arched gateways** (pillars + a parabolic stepped crown), a low
+  central **dais**, and eight **braziers** (lit pedestals + additive flames). The flooded
+  pit uses `water_storm.fs` (grey-blue, busy rain ripples) under a stormy `sky_storm.fs`;
+  `render.cpp` gives it cool overcast light. The 8 brazier positions feed the crystal-light
+  array so warm fire pools on the grey water; `build_crystals`/`draw_crystals` branch to
+  "no gems" for this level, and the `boss_arena` rock obstacles are skipped.
+- Concept + a very concrete build spec (tier radii/heights, gateway dims, brazier coords)
+  were generated with the **Codex CLI** into `design/sunken_colosseum_*`.
+- All the per-level arrays in arena.cpp are now 4-entry; `save.{h,cpp}` store 4 levels.

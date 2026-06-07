@@ -35,6 +35,7 @@ int main(int argc, char** argv) {
         if (TextIsEqual(argv[i], "scenic")) scenic = true;
         if (TextIsEqual(argv[i], "ice") || TextIsEqual(argv[i], "frozen")) { g_level = LEVEL_FROZEN; level_arg = true; }
         if (TextIsEqual(argv[i], "forge") || TextIsEqual(argv[i], "lava")) { g_level = LEVEL_FORGE; level_arg = true; }
+        if (TextIsEqual(argv[i], "colosseum") || TextIsEqual(argv[i], "pit")) { g_level = LEVEL_COLOSSEUM; level_arg = true; }
     }
 
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);

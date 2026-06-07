@@ -3,10 +3,10 @@
 // plus the last level picked. Written when the player rests at a bonfire.
 #include <string>
 
-constexpr int NUM_LEVELS = 3;
+constexpr int NUM_LEVELS = 4;
 
 struct SaveData {
-    bool beaten[NUM_LEVELS] = { false, false, false };
+    bool beaten[NUM_LEVELS] = { false, false, false, false };
     int  last_level = 0;
 };
 

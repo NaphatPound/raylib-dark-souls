@@ -42,6 +42,12 @@ void LitShader::load() {
         ambient  = { 0.80f, 0.42f, 0.28f };                          // warm dim ambient (lava bounce)
         fogCol   = { 0.34f, 0.11f, 0.06f };                          // smoky orange-black
         fogDen   = 0.0052f;
+    } else if (g_level == LEVEL_COLOSSEUM) {                         // stormy sunken-colosseum lighting
+        lightDir = Vector3Normalize({ -0.30f, 0.80f, 0.30f });       // flat overcast light
+        lightCol = { 0.86f, 0.92f, 1.00f };                          // cool desaturated daylight
+        ambient  = { 0.60f, 0.68f, 0.78f };                          // moody grey-blue ambient
+        fogCol   = { 0.46f, 0.54f, 0.60f };                          // grey rain haze
+        fogDen   = 0.0140f;                                          // thick wet mist
     }
     float   emissive = 0.0f;
     SetShaderValue(shader, loc_lightDir, &lightDir, SHADER_UNIFORM_VEC3);

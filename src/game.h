@@ -4,7 +4,7 @@
 #include "actor.h"
 
 // Selectable level / visual theme (chosen in the start menu or via the CLI).
-enum Level { LEVEL_BLOODMOON = 0, LEVEL_FROZEN = 1, LEVEL_FORGE = 2 };
+enum Level { LEVEL_BLOODMOON = 0, LEVEL_FROZEN = 1, LEVEL_FORGE = 2, LEVEL_COLOSSEUM = 3 };
 extern int g_level;
 
 struct Game {
