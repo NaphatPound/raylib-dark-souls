@@ -228,3 +228,20 @@ slider quantization.
   still read). **Fix** (`player.cpp`): raised the trail's leading-edge alpha (90→160);
   the cubic falloff keeps the tail clear, so it now reads over bright backgrounds for
   both attacks while staying a concentrated wisp.
+
+## New level: Frozen Cathedral
+
+- **Concept/design** drafted with the **Codex CLI** (`codex exec`, prompt piped via
+  stdin with `--sandbox workspace-write`) into `design/` — `frozen_cathedral_concept.svg`,
+  `palette.svg`, `frozen_cathedral_design.md` (palette hex, lighting values, full arena
+  layout). First two attempts failed: a multi-line prompt as a CLI arg got split by the
+  shell/clap, and `-a` isn't an `exec` flag — fixed by piping the prompt via stdin (`-`).
+- **Level selector**: `int g_level` (game.h, `LEVEL_BLOODMOON`/`LEVEL_FROZEN`), set from a
+  new `ice`/`frozen` CLI arg in main.cpp. Combines with `scenic`/`auto`.
+- **Re-themed the shared pipeline** rather than duplicating it: `render.cpp` swaps to cold
+  overcast lighting; `arena.cpp` loads `sky_ice.fs` + `water_ice.fs` (moonless pale-blue
+  dome, frozen reflective lake with crack lines), recolours the crystals + their point
+  light to ice-blue, skips the blood-moon disc, and adds `draw_ice_props()` — a procedural
+  ruined gothic colonnade (10 lit cubes on a ring per the design spec) + translucent ice
+  spires. Existing arena rocks + the player/boss are reused, re-lit cold. Verified
+  playable (`ice auto` → full fight) and with `ice scenic`.

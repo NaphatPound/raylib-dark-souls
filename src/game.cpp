@@ -3,6 +3,7 @@
 
 Game g_game;
 Events g_events;
+int g_level = LEVEL_BLOODMOON;
 
 void Game::set_state(State s) {
     if (state == s) return;

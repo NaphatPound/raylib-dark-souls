@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="220" viewBox="0 0 1280 220" role="img" aria-labelledby="title desc">
+  <title id="title">Frozen Cathedral Palette</title>
+  <desc id="desc">Labelled colour swatches for the Frozen Cathedral level concept.</desc>
+  <rect width="1280" height="220" fill="#09131d"/>
+  <style>
+    .label { font: 700 20px Arial, sans-serif; fill: #eefbff; }
+    .hex { font: 16px Consolas, monospace; fill: #c7dce3; }
+  </style>
+  <g transform="translate(40 36)">
+    <g>
+      <rect x="0" y="0" width="150" height="96" rx="8" fill="#07111F"/>
+      <text x="0" y="128" class="label">sky/zenith</text>
+      <text x="0" y="154" class="hex">#07111F</text>
+    </g>
+    <g transform="translate(170 0)">
+      <rect x="0" y="0" width="150" height="96" rx="8" fill="#D8EEF3"/>
+      <text x="0" y="128" class="label">horizon fog</text>
+      <text x="0" y="154" class="hex">#D8EEF3</text>
+    </g>
+    <g transform="translate(340 0)">
+      <rect x="0" y="0" width="150" height="96" rx="8" fill="#9BD9EE"/>
+      <text x="0" y="128" class="label">ice</text>
+      <text x="0" y="154" class="hex">#9BD9EE</text>
+    </g>
+    <g transform="translate(510 0)">
+      <rect x="0" y="0" width="150" height="96" rx="8" fill="#C9F3FF"/>
+      <text x="0" y="128" class="label">cold light</text>
+      <text x="0" y="154" class="hex">#C9F3FF</text>
+    </g>
+    <g transform="translate(680 0)">
+      <rect x="0" y="0" width="150" height="96" rx="8" fill="#70E7FF"/>
+      <text x="0" y="128" class="label">crystal glow</text>
+      <text x="0" y="154" class="hex">#70E7FF</text>
+    </g>
+    <g transform="translate(850 0)">
+      <rect x="0" y="0" width="150" height="96" rx="8" fill="#173047"/>
+      <text x="0" y="128" class="label">frozen-water</text>
+      <text x="0" y="154" class="hex">#173047</text>
+    </g>
+    <g transform="translate(1020 0)">
+      <rect x="0" y="0" width="150" height="96" rx="8" fill="#2C3942"/>
+      <text x="0" y="128" class="label">stone</text>
+      <text x="0" y="154" class="hex">#2C3942</text>
+    </g>
+  </g>
+</svg>

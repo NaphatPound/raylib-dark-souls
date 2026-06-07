@@ -3,6 +3,10 @@
 #include "signal.h"
 #include "actor.h"
 
+// Selectable level / visual theme (set once at startup from the CLI).
+enum Level { LEVEL_BLOODMOON = 0, LEVEL_FROZEN = 1 };
+extern int g_level;
+
 struct Game {
     enum State { TITLE, FIGHT, DEAD, VICTORY };
 

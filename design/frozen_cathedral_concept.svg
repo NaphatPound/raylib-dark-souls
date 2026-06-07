@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Frozen Cathedral Arena Concept Art</title>
+  <desc id="desc">A cold pale-blue boss arena inside shattered gothic cathedral ruins, with ice pillars, glowing crystals, fog, god-rays, a frozen reflective lake floor, and a lone figure for scale.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.42" stop-color="#16304a"/>
+      <stop offset="0.72" stop-color="#9fbed1"/>
+      <stop offset="1" stop-color="#d8eef3"/>
+    </linearGradient>
+    <linearGradient id="iceFloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d7f5fb" stop-opacity="0.55"/>
+      <stop offset="0.38" stop-color="#8eb6c9" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#173047" stop-opacity="0.92"/>
+    </linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#51616b"/>
+      <stop offset="0.45" stop-color="#2c3942"/>
+      <stop offset="1" stop-color="#111923"/>
+    </linearGradient>
+    <linearGradient id="ice" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f1ffff" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#9bd9ee" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#2d617d" stop-opacity="0.95"/>
+    </linearGradient>
+    <radialGradient id="crystalGlow" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#d7ffff" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#8eeeff" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#54c7e8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="reflectionFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c8f6ff" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#06111f" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softBlur">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="thinGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="floorClip">
+      <path d="M0 444 C220 385 394 372 640 375 C887 378 1073 392 1280 448 L1280 720 L0 720 Z"/>
+    </clipPath>
+    <clipPath id="arenaClip">
+      <ellipse cx="640" cy="515" rx="545" ry="150"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#sky)"/>
+
+  <g opacity="0.42" filter="url(#softBlur)">
+    <path d="M95 0 L430 720 L525 720 L208 0 Z" fill="#c9f3ff"/>
+    <path d="M520 0 L620 720 L708 720 L625 0 Z" fill="#d9fbff"/>
+    <path d="M890 0 L690 720 L780 720 L1015 0 Z" fill="#c6efff"/>
+    <path d="M1120 0 L820 720 L900 720 L1225 0 Z" fill="#b6e6fa"/>
+  </g>
+
+  <g opacity="0.58">
+    <path d="M0 337 C180 305 330 316 510 334 C735 357 889 299 1075 320 C1162 330 1220 352 1280 382 L1280 474 C1114 418 963 413 791 430 C561 452 377 426 190 421 C102 419 40 431 0 444 Z" fill="#d8eef3"/>
+    <path d="M0 371 C180 346 355 362 530 378 C753 398 935 350 1120 363 C1193 368 1243 388 1280 410 L1280 461 C1020 412 847 441 643 443 C422 446 230 399 0 424 Z" fill="#b7d7df" opacity="0.55"/>
+  </g>
+
+  <g id="distant-cathedral" opacity="0.92">
+    <path d="M158 382 L158 244 L210 206 L262 244 L262 382 Z" fill="url(#stone)"/>
+    <path d="M178 382 L178 257 C178 224 242 224 242 257 L242 382 Z" fill="#09131d"/>
+    <path d="M116 393 L116 286 L151 257 L185 286 L185 393 Z" fill="url(#stone)" opacity="0.82"/>
+    <path d="M286 394 L286 284 L325 251 L364 284 L364 394 Z" fill="url(#stone)" opacity="0.82"/>
+
+    <path d="M492 388 L492 170 L546 125 L600 170 L600 388 Z" fill="url(#stone)"/>
+    <path d="M520 388 L520 190 C520 151 572 151 572 190 L572 388 Z" fill="#09131d"/>
+    <path d="M451 396 L451 244 L492 210 L533 244 L533 396 Z" fill="url(#stone)" opacity="0.76"/>
+    <path d="M610 396 L610 246 L651 211 L692 246 L692 396 Z" fill="url(#stone)" opacity="0.76"/>
+
+    <path d="M756 391 L756 236 L820 188 L884 236 L884 391 Z" fill="url(#stone)"/>
+    <path d="M783 391 L783 257 C783 214 857 214 857 257 L857 391 Z" fill="#09131d"/>
+    <path d="M900 400 L900 278 L942 244 L984 278 L984 400 Z" fill="url(#stone)" opacity="0.72"/>
+
+    <path d="M1050 394 L1050 252 L1092 220 L1134 252 L1134 394 Z" fill="url(#stone)" opacity="0.76"/>
+    <path d="M1070 394 L1070 269 C1070 238 1114 238 1114 269 L1114 394 Z" fill="#09131d"/>
+  </g>
+
+  <g id="foreground-ruins">
+    <path d="M50 444 L50 180 L91 180 L91 431 Z" fill="url(#stone)"/>
+    <path d="M119 432 L119 205 L153 205 L153 423 Z" fill="url(#stone)"/>
+    <path d="M50 183 C56 134 145 134 153 206 L126 206 C118 169 83 165 76 183 Z" fill="#42535e"/>
+    <path d="M32 446 L170 425 L168 464 L30 476 Z" fill="#1a2530"/>
+
+    <path d="M1115 429 L1115 194 L1155 194 L1155 445 Z" fill="url(#stone)"/>
+    <path d="M1190 448 L1190 174 L1230 174 L1230 470 Z" fill="url(#stone)"/>
+    <path d="M1115 196 C1125 138 1219 124 1230 176 L1206 178 C1195 153 1153 157 1140 196 Z" fill="#4f626d"/>
+    <path d="M1100 470 L1260 492 L1262 532 L1092 503 Z" fill="#19242d"/>
+
+    <path d="M334 405 L334 241 L363 241 L363 400 Z" fill="url(#stone)" opacity="0.9"/>
+    <path d="M323 242 C328 203 369 197 384 231 L363 241 L334 241 Z" fill="#465763" opacity="0.88"/>
+    <path d="M941 408 L941 236 L970 236 L970 413 Z" fill="url(#stone)" opacity="0.9"/>
+    <path d="M917 239 C930 199 978 200 991 239 L970 236 L941 236 Z" fill="#465763" opacity="0.88"/>
+  </g>
+
+  <g id="ice-pillars">
+    <path d="M228 405 L263 271 L300 405 L278 458 L241 457 Z" fill="url(#ice)" opacity="0.92"/>
+    <path d="M263 271 L266 456" stroke="#dfffff" stroke-width="3" opacity="0.58"/>
+    <path d="M231 404 L263 271 L246 450" fill="#f4ffff" opacity="0.22"/>
+
+    <path d="M395 420 L430 228 L476 418 L451 493 L409 489 Z" fill="url(#ice)" opacity="0.95"/>
+    <path d="M430 228 L434 489" stroke="#e8ffff" stroke-width="3" opacity="0.6"/>
+    <path d="M426 231 L453 491 L476 418" fill="#3f7790" opacity="0.22"/>
+
+    <path d="M806 417 L848 244 L901 425 L872 497 L823 493 Z" fill="url(#ice)" opacity="0.93"/>
+    <path d="M848 244 L852 496" stroke="#e6ffff" stroke-width="3" opacity="0.55"/>
+    <path d="M848 244 L821 493 L806 417" fill="#f8ffff" opacity="0.2"/>
+
+    <path d="M1011 405 L1044 295 L1079 414 L1064 464 L1025 465 Z" fill="url(#ice)" opacity="0.86"/>
+    <path d="M1044 295 L1047 463" stroke="#efffff" stroke-width="2" opacity="0.5"/>
+  </g>
+
+  <g id="crystals" filter="url(#thinGlow)">
+    <ellipse cx="184" cy="449" rx="72" ry="38" fill="url(#crystalGlow)"/>
+    <path d="M152 452 L166 392 L184 450 Z" fill="#9ef6ff"/>
+    <path d="M181 453 L205 371 L228 454 Z" fill="#6ee8ff"/>
+    <path d="M212 456 L238 410 L250 459 Z" fill="#cffeff"/>
+
+    <ellipse cx="711" cy="428" rx="88" ry="42" fill="url(#crystalGlow)"/>
+    <path d="M665 432 L689 348 L711 433 Z" fill="#b9fbff"/>
+    <path d="M703 436 L738 326 L763 438 Z" fill="#72e9ff"/>
+    <path d="M750 440 L783 383 L798 442 Z" fill="#d8ffff"/>
+
+    <ellipse cx="1110" cy="468" rx="84" ry="40" fill="url(#crystalGlow)"/>
+    <path d="M1072 471 L1096 397 L1116 471 Z" fill="#aaf8ff"/>
+    <path d="M1110 475 L1142 366 L1167 477 Z" fill="#70e7ff"/>
+    <path d="M1154 479 L1185 424 L1202 482 Z" fill="#d6ffff"/>
+  </g>
+
+  <g id="frozen-lake" clip-path="url(#floorClip)">
+    <path d="M0 444 C220 385 394 372 640 375 C887 378 1073 392 1280 448 L1280 720 L0 720 Z" fill="url(#iceFloor)"/>
+    <ellipse cx="640" cy="525" rx="545" ry="146" fill="#c9f3ff" opacity="0.12"/>
+    <ellipse cx="640" cy="526" rx="470" ry="112" fill="none" stroke="#e9ffff" stroke-width="2" opacity="0.35"/>
+    <ellipse cx="640" cy="532" rx="346" ry="72" fill="none" stroke="#6bbfd8" stroke-width="1.5" opacity="0.36"/>
+    <path d="M126 506 C300 469 484 459 641 464 C817 470 989 483 1155 520" fill="none" stroke="#f2ffff" stroke-width="3" opacity="0.42"/>
+    <path d="M72 560 C260 517 452 509 637 516 C827 522 1025 537 1216 589" fill="none" stroke="#9ed8e9" stroke-width="2" opacity="0.34"/>
+    <path d="M258 611 C456 573 691 575 1018 631" fill="none" stroke="#e5ffff" stroke-width="2" opacity="0.22"/>
+    <g opacity="0.32">
+      <path d="M316 485 L407 470 L455 478 L536 466" fill="none" stroke="#eaffff" stroke-width="1.5"/>
+      <path d="M700 500 L760 488 L822 498 L900 481" fill="none" stroke="#eaffff" stroke-width="1.5"/>
+      <path d="M484 573 L566 556 L613 564 L702 545" fill="none" stroke="#d7ffff" stroke-width="1.5"/>
+      <path d="M930 603 L1002 586 L1064 600 L1138 579" fill="none" stroke="#d7ffff" stroke-width="1.5"/>
+    </g>
+  </g>
+
+  <g id="reflections" clip-path="url(#arenaClip)" opacity="0.62">
+    <g transform="translate(0 818) scale(1 -0.58)">
+      <path d="M228 405 L263 271 L300 405 L278 458 L241 457 Z" fill="url(#reflectionFade)"/>
+      <path d="M395 420 L430 228 L476 418 L451 493 L409 489 Z" fill="url(#reflectionFade)"/>
+      <path d="M806 417 L848 244 L901 425 L872 497 L823 493 Z" fill="url(#reflectionFade)"/>
+      <path d="M1011 405 L1044 295 L1079 414 L1064 464 L1025 465 Z" fill="url(#reflectionFade)"/>
+      <path d="M492 388 L492 170 L546 125 L600 170 L600 388 Z" fill="#b9eaf5" opacity="0.14"/>
+      <path d="M756 391 L756 236 L820 188 L884 236 L884 391 Z" fill="#b9eaf5" opacity="0.14"/>
+      <path d="M152 452 L166 392 L184 450 Z" fill="#8df4ff" opacity="0.28"/>
+      <path d="M703 436 L738 326 L763 438 Z" fill="#8df4ff" opacity="0.34"/>
+      <path d="M1110 475 L1142 366 L1167 477 Z" fill="#8df4ff" opacity="0.3"/>
+    </g>
+  </g>
+
+  <g id="lone-figure" transform="translate(640 468)">
+    <ellipse cx="0" cy="48" rx="17" ry="6" fill="#06111c" opacity="0.55"/>
+    <path d="M-8 10 C-10 25 -10 38 -13 50 L-6 50 L0 29 L7 50 L14 50 C10 36 10 23 8 10 Z" fill="#09111b"/>
+    <path d="M-12 9 C-8 -4 8 -4 12 9 C8 16 -8 16 -12 9 Z" fill="#162333"/>
+    <circle cx="0" cy="-7" r="8" fill="#0b121a"/>
+    <path d="M-2 2 L-29 37" stroke="#c9f8ff" stroke-width="3" opacity="0.9"/>
+    <path d="M-32 39 L-22 35" stroke="#eaffff" stroke-width="2" opacity="0.85"/>
+  </g>
+
+  <g id="near-fog" opacity="0.5" filter="url(#softBlur)">
+    <path d="M-40 522 C174 474 350 512 552 497 C721 485 890 471 1080 502 C1198 520 1262 540 1325 558 L1325 720 L-40 720 Z" fill="#d6edf2"/>
+    <path d="M-30 630 C195 586 404 616 638 602 C875 588 1023 622 1310 592 L1310 720 L-30 720 Z" fill="#a8cbd7" opacity="0.55"/>
+  </g>
+
+  <rect x="0" y="0" width="1280" height="720" fill="#d9ffff" opacity="0.04"/>
+</svg>

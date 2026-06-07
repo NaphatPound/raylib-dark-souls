@@ -71,9 +71,23 @@ cmake --build build
 
 Run from the project root so the baked `ASSET_DIR` resolves:
 ```sh
-./build/dark_souls_raylib.exe
+./build/dark_souls_raylib.exe          # default: the blood-moon ruin
+./build/dark_souls_raylib.exe ice      # the Frozen Cathedral level
 ```
-(Pass `auto` as an argument for a hands-free demo that walks into the boss.)
+(Pass `auto` for a hands-free demo, `scenic` for a fly-by of the arena; flags combine, e.g. `ice scenic`.)
+
+## Levels
+
+| Blood-Moon Ruin (default) | Frozen Cathedral (`ice`) |
+| :---: | :---: |
+| ![Blood moon](docs/screenshots/fight.png) | ![Frozen cathedral](docs/screenshots/frozen.png) |
+
+The **Frozen Cathedral** is a second level (`int g_level` / `LEVEL_FROZEN`) that re-themes
+the shared rendering pipeline: cold overcast lighting, a moonless pale-blue sky dome
+(`sky_ice.fs`), a frozen reflective lake (`water_ice.fs`), ice-blue bioluminescent
+crystals, and a procedural ruined gothic colonnade + jagged ice spires (`arena.cpp`
+`draw_ice_props`). Concept art and the build spec live in [`design/`](design/) — the
+concept was drafted with the Codex CLI from `design/frozen_cathedral_design.md`.
 
 ## Asset pipeline (FBX → glb)
 

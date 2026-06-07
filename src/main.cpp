@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
         if (TextIsEqual(argv[i], "auto")) auto_demo = true;
         if (TextIsEqual(argv[i], "diag")) diag = true;
         if (TextIsEqual(argv[i], "scenic")) scenic = true;
+        if (TextIsEqual(argv[i], "ice") || TextIsEqual(argv[i], "frozen")) g_level = LEVEL_FROZEN;
     }
 
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);

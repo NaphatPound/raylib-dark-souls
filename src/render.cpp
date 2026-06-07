@@ -1,5 +1,6 @@
 #include "render.h"
 #include "assets.h"
+#include "game.h"
 #include "raymath.h"
 
 LitShader g_lit;
@@ -29,6 +30,13 @@ void LitShader::load() {
     Vector3 ambient  = { 1.15f, 0.78f, 0.74f };                      // soft rose ambient (lifted)
     Vector3 fogCol   = { 0.24f, 0.09f, 0.10f };
     float   fogDen   = 0.0030f;
+    if (g_level == LEVEL_FROZEN) {                                   // cold frozen-cathedral lighting (per design spec)
+        lightDir = Vector3Normalize({ 0.35f, 0.82f, 0.45f });        // high pale overcast light
+        lightCol = { 0.90f, 1.05f, 1.22f };                          // cool blue-white
+        ambient  = { 0.70f, 0.84f, 1.05f };                          // pale icy ambient (lifted)
+        fogCol   = { 0.72f, 0.83f, 0.92f };                          // milky cold haze (#D8EEF3-ish)
+        fogDen   = 0.0120f;                                          // low-hanging cold mist
+    }
     float   emissive = 0.0f;
     SetShaderValue(shader, loc_lightDir, &lightDir, SHADER_UNIFORM_VEC3);
     SetShaderValue(shader, loc_lightColor, &lightCol, SHADER_UNIFORM_VEC3);
