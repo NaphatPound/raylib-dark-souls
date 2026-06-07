@@ -18,6 +18,9 @@ void LitShader::load() {
     loc_fogColor   = GetShaderLocation(shader, "uFogColor");
     loc_fogDensity = GetShaderLocation(shader, "uFogDensity");
     loc_emissive   = GetShaderLocation(shader, "uEmissive");
+    loc_plightN    = GetShaderLocation(shader, "uPLightN");
+    loc_plights    = GetShaderLocation(shader, "uPLights");
+    loc_plightColor= GetShaderLocation(shader, "uPLightColor");
 
     Vector3 lightDir = Vector3Normalize({ 0.12f, 0.82f, -0.58f });  // toward the moon
     Vector3 lightCol = { 1.45f, 0.92f, 0.84f };                      // rose moonlight
@@ -43,6 +46,15 @@ void LitShader::set_frame(Vector3 viewPos) {
 void LitShader::set_emissive(float e) {
     if (!ok) return;
     SetShaderValue(shader, loc_emissive, &e, SHADER_UNIFORM_FLOAT);
+}
+
+void LitShader::set_point_lights(const Vector4* lights, int count, Vector3 color) {
+    if (!ok) return;
+    if (count > 32) count = 32;
+    SetShaderValue(shader, loc_plightN, &count, SHADER_UNIFORM_INT);
+    SetShaderValue(shader, loc_plightColor, &color, SHADER_UNIFORM_VEC3);
+    if (count > 0)
+        SetShaderValueV(shader, loc_plights, lights, SHADER_UNIFORM_VEC4, count);
 }
 
 void LitShader::apply_to_model(Model& m) {

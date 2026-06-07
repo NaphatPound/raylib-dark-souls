@@ -77,7 +77,7 @@ static void build_crystals() {
         c.light_pos = p + Vector3{ 0, tallest * 0.5f + 0.6f, 0 };
         s_crystals.push_back(c);
         if ((int)s_crystal_lights.size() < MAX_CRYSTAL_LIGHTS)            // glow radius scales with cluster size
-            s_crystal_lights.push_back(Vector4{ p.x, water_level, p.z, 4.0f + cs * 2.4f });
+            s_crystal_lights.push_back(Vector4{ p.x, 1.0f, p.z, 4.0f + cs * 2.4f });   // y lifts it onto geometry; water uses xz only
         placed++;
     }
 }
@@ -153,6 +153,8 @@ void load(Shader lit) {
     if (cn > 0)
         SetShaderValueV(s_water_shader, s_loc_cry_arr, s_crystal_lights.data(),
                         SHADER_UNIFORM_VEC4, cn);
+    // same crystal lights illuminate the rocks/fighters via the lit shader
+    g_lit.set_point_lights(s_crystal_lights.data(), cn, Vector3{ 0.85f, 0.14f, 0.10f });
 }
 
 void update(float dt) { s_time += dt; }

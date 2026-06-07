@@ -29,7 +29,7 @@ struct Fx {
     void draw(const Camera3D& cam);
 
     void hit(Vector3 pos, float amount);
-    void impact_wave(Vector3 pos);
+    void impact_wave(Vector3 pos, float amount);
     void parry(Vector3 pos);
     void riposte(Vector3 pos);
     void enrage(Vector3 pos);

@@ -19,7 +19,7 @@ void Juice::on_hit_landed(Actor* target, float amount) {
     if (target) {
         Vector3 hp = target->position() + Vector3{ 0, 1.1f, 0 };
         g_fx.hit(hp, amount);
-        g_fx.impact_wave(hp);
+        g_fx.impact_wave(hp, amount);
     }
     if (hitstop_timer <= 0.0f) hitstop_timer = 0.07f;   // don't extend an active freeze (juice.gd _stopping guard)
 }

@@ -7,6 +7,18 @@ combat.
 
 > Original design: `info.md` / `plan.md` / `logs.md` in the Godot project.
 
+## Screenshots
+
+| Moonlit ruin — blood moon, sky dome & reflective water | The fight — sword trail, attack telegraphs, crystal light |
+| :---: | :---: |
+| ![Arena](docs/screenshots/arena.png) | ![Combat](docs/screenshots/combat.png) |
+
+![Boss fight](docs/screenshots/fight.png)
+
+*Planar-reflective water with a moonlight glade, cloudy-red gem crystals that cast
+red light onto the rocks and fighters, a soft white sword trail, impact waves, and
+parry (orange) / unblockable (red) attack telegraphs.*
+
 ## Features (ported 1:1 from the GDScript)
 
 - **Player**: camera-relative 8-dir movement, sprint, third-person camera with

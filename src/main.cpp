@@ -233,6 +233,7 @@ int main(int argc, char** argv) {
                 arena::draw_world(mcam);
                 player.draw();                // reflect the fighters in the water too
                 boss.draw();
+                g_fx.draw(mcam);              // and the blood/spark VFX
                 rlEnableBackfaceCulling();
             EndMode3D();
         EndTextureMode();

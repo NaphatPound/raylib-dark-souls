@@ -79,10 +79,12 @@ void Fx::hit(Vector3 pos, float amount) {
     burst(pos, "spark", Color{ 255, 120, 90, 255 }, 8, 0.32f, 3.0f, 7.0f, 180.0f,
           Vector3{ 0, 1, 0 }, Vector3{ 0, -6, 0 }, 0.12f, 0.26f, true);
 }
-// a quick pale shockwave ring on impact (camera-facing) for a bit of "wave" punch
-void Fx::impact_wave(Vector3 pos) {
-    ring(pos, Color{ 255, 246, 232, 200 }, 2.0f, 0.26f, false);
-    ring(pos, Color{ 255, 210, 170, 150 }, 1.1f, 0.16f, false);
+// a quick pale shockwave ring on impact (camera-facing); scales with hit strength so
+// heavy hits / ripostes punch bigger than light pokes
+void Fx::impact_wave(Vector3 pos, float amount) {
+    float s = fminf(fmaxf(amount / 26.0f, 0.7f), 1.9f);
+    ring(pos, Color{ 255, 246, 232, 210 }, 2.0f * s, 0.26f, false);
+    ring(pos, Color{ 255, 210, 170, 150 }, 1.1f * s, 0.16f, false);
 }
 void Fx::parry(Vector3 pos) {
     burst(pos, "spark", Color{ 255, 242, 153, 255 }, 26, 0.5f, 4.0f, 8.5f, 180.0f,

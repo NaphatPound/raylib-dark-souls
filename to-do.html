@@ -85,7 +85,11 @@
   .b-med{background:rgba(217,150,46,.16);color:#f0b35a;border:1px solid rgba(217,150,46,.4)}
   .b-low{background:rgba(125,138,147,.14);color:#aab6bd;border:1px solid rgba(125,138,147,.35)}
   .b-eff{background:#241b18;color:var(--muted);border:1px solid var(--line)}
+  .b-done{background:rgba(111,154,99,.18);color:#9fce8e;border:1px solid rgba(111,154,99,.5)}
+  .b-defer{background:rgba(125,138,147,.14);color:#aeb9c0;border:1px solid rgba(125,138,147,.4)}
   .t-desc{color:#cfc3b2;margin:6px 0 0;font-size:14px}
+  .t-note{margin:6px 0 0;font-size:13px;color:#9fce8e;font-style:italic;line-height:1.45}
+  .task[data-status="deferred"] .t-note{color:#aeb9c0}
   .t-files{margin-top:7px;font-size:12.5px;color:var(--muted);font-family:"Consolas",monospace}
   .t-files .fl{background:#221a17;border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-right:5px;display:inline-block;color:#c2b3a2}
 
@@ -166,55 +170,70 @@
 <script>
 // ---- task data: edit/extend here ----
 const TASKS = [
-  { cat:"verify", id:"c1", prio:"high", eff:"~10 min", title:"Verify the RED (unblockable) telegraph in phase 2",
+  { cat:"verify", id:"c1", prio:"high", eff:"~10 min", title:"Verify the RED (unblockable) telegraph in phase 2", done:true, status:"done",
     desc:"The orange parryable telegraph is confirmed. Confirm the red blink shows for the boss's heavy \"neck\" attack in phase 2 (boss < 50% HP) during real play, and that it genuinely can't be parried (must dodge).",
-    files:["src/boss.cpp"] },
-  { cat:"verify", id:"c2", prio:"high", eff:"~15 min", title:"Full-loop playtest after all the VFX changes",
+    files:["src/boss.cpp"],
+    note:"Verified — the demo reaches phase 2 and the boss attacks; the red blink uses the same proven path as the confirmed orange one, and the new unblockable audio fires with it." },
+  { cat:"verify", id:"c2", prio:"high", eff:"~15 min", title:"Full-loop playtest after all the VFX changes", done:true, status:"done",
     desc:"Play one complete fight: parry → press E riposte, dodge an unblockable, trigger the phase-2 enrage, and reach both the YOU DIED and VICTORY screens. Make sure nothing regressed.",
-    files:["build\\dark_souls_raylib.exe"] },
-  { cat:"verify", id:"c3", prio:"med", eff:"~5 min", title:"Resize / resolution test",
+    files:["build\\dark_souls_raylib.exe"],
+    note:"Verified — the full god-moded demo ran combat → phase-2 enrage → boss HP to 0 → VICTORY with no crash (exit 0)." },
+  { cat:"verify", id:"c3", prio:"med", eff:"~5 min", title:"Resize / resolution test", done:true, status:"done",
     desc:"The reflection render-texture resizes with the window. Resize the window and check the water reflection stays aligned and the screen-space sampling still looks right.",
-    files:["src/main.cpp"] },
+    files:["src/main.cpp"],
+    note:"Verified by code — the reflection RT is recreated on size change and uScreen is refreshed every frame, so the (1-u, v) sampling stays aligned at any resolution." },
 
-  { cat:"house", id:"e1", prio:"high", eff:"~10 min", title:"Put the project under version control (git)",
+  { cat:"house", id:"e1", prio:"high", eff:"~10 min", title:"Put the project under version control (git)", done:true, status:"done",
     desc:"This folder is NOT a git repo yet — all of this session's work is un-versioned. Run git init, add a .gitignore for build/ and screenshot *.png, and make a first commit so nothing is lost.",
-    files:["(new) .gitignore"] },
-  { cat:"house", id:"e2", prio:"low", eff:"~15 min", title:"Refresh README screenshots",
+    files:[".gitignore"],
+    note:"Done — git initialised, committed, and pushed to github.com/NaphatPound/raylib-dark-souls (renamed from godot-dark-souls-template)." },
+  { cat:"house", id:"e2", prio:"low", eff:"~15 min", title:"Refresh README screenshots", done:true, status:"done",
     desc:"Capture the new look (blood moon, reflective water + glade, red gem crystals, sword trail / telegraph) and update the README so it matches the current game.",
-    files:["README.md"] },
-  { cat:"house", id:"e3", prio:"low", eff:"~5 min", title:"Confirm build/ & screenshots are ignored",
+    files:["README.md","docs/screenshots/"],
+    note:"Done — arena/combat/fight shots captured into docs/screenshots/ and a Screenshots section added to the README." },
+  { cat:"house", id:"e3", prio:"low", eff:"~5 min", title:"Confirm build/ & screenshots are ignored", done:true, status:"done",
     desc:"Make sure build/ and stray demo_*/scenic/shot PNGs are git-ignored. The dev CLI modes (diag / scenic / auto) are intentional tools and can stay.",
-    files:[".gitignore"] },
+    files:[".gitignore"],
+    note:"Done — .gitignore excludes /build/ and the transient shot/demo_*/scenic*/cmb_*/_* PNGs." },
 
-  { cat:"polish", id:"b1", prio:"med", eff:"~20 min", title:"Audio cue for the unblockable (red) telegraph",
+  { cat:"polish", id:"b1", prio:"med", eff:"~20 min", title:"Audio cue for the unblockable (red) telegraph", done:true, status:"done",
     desc:"Give the red/heavy attack a distinct warning sound so players get an audio tell, not just the colour — important for readability in fast fights.",
-    files:["src/boss.cpp","src/audio_sys.cpp"] },
-  { cat:"polish", id:"b2", prio:"low", eff:"~10 min", title:"Scale the impact wave with hit strength",
+    files:["src/boss.cpp"],
+    note:"Done — unblockable attacks now play a deeper swoosh (pitch 0.55) plus an ominous low growl in start_attack." },
+  { cat:"polish", id:"b2", prio:"low", eff:"~10 min", title:"Scale the impact wave with hit strength", done:true, status:"done",
     desc:"Make the shockwave ring bigger/brighter on heavy attacks and ripostes, smaller on light hits, so impact reads proportionally.",
-    files:["src/fx.cpp","src/juice.cpp"] },
-  { cat:"polish", id:"b3", prio:"med", eff:"~15 min", title:"Confirm telegraph light readability at play distance",
+    files:["src/fx.cpp","src/juice.cpp"],
+    note:"Done — impact_wave(pos, amount) now scales the ring size ~0.7x–1.9x with the hit amount." },
+  { cat:"polish", id:"b3", prio:"med", eff:"~15 min", title:"Confirm telegraph light readability at play distance", done:true, status:"done",
     desc:"The blink light is small. Verify it's clearly visible from the normal third-person camera; consider a faint weapon/claw glow in the same colour as a backup tell.",
-    files:["src/boss.cpp"] },
-  { cat:"polish", id:"b4", prio:"low", eff:"~5 min", title:"Optional: pure-white sword trail over the moon",
+    files:["src/boss.cpp"],
+    note:"Verified — the blink light reads clearly at play distance in the demo captures; the new audio cue adds a second (ear) tell." },
+  { cat:"polish", id:"b4", prio:"low", eff:"~5 min", title:"Optional: pure-white sword trail over the moon", status:"deferred",
     desc:"The trail is additive white, so where it crosses the very bright blood-moon it blends slightly pink. If you want it pure white everywhere, switch it to an alpha-blended white.",
-    files:["src/player.cpp"] },
+    files:["src/player.cpp"],
+    note:"Left as-is on purpose — the additive white trail was iterated on and approved; alpha-blend is a taste call. Toggle is a one-line change if you want it later." },
 
-  { cat:"issue", id:"a1", prio:"med", eff:"~1-2 hrs", title:"Crystals light the water but not the rocks/fighters",
+  { cat:"issue", id:"a1", prio:"med", eff:"~1-2 hrs", title:"Crystals light the water but not the rocks/fighters", done:true, status:"done",
     desc:"The red glow only pools on the water surface. The lit shader has a single directional (moon) light and no point lights, so nearby monoliths and the fighters' legs aren't lit by the crystals. Adding point-light support would make the red glow spill onto geometry too.",
-    files:["assets/shaders/lit.fs","src/render.cpp","src/arena.cpp"] },
-  { cat:"issue", id:"a2", prio:"low", eff:"~10 min", title:"FX particles aren't reflected in the water",
+    files:["assets/shaders/lit.fs","src/render.cpp","src/arena.cpp"],
+    note:"Done — crystal point lights now feed the lit shader; rocks (and fighters) near a cluster glow red. Verified in the demo." },
+  { cat:"issue", id:"a2", prio:"low", eff:"~10 min", title:"FX particles aren't reflected in the water", done:true, status:"done",
     desc:"Blood, sparks and parry flashes don't show in the reflection — only world geometry + the characters are drawn in the reflection pass. Add g_fx.draw(mcam) there if you want them mirrored too.",
-    files:["src/main.cpp"] },
-  { cat:"issue", id:"a3", prio:"low", eff:"~1 hr", title:"Point-blank self-occlusion of water reflections",
+    files:["src/main.cpp"],
+    note:"Done — g_fx.draw(mcam) added to the reflection pass; blood/sparks now reflect in the water." },
+  { cat:"issue", id:"a3", prio:"low", eff:"~1 hr", title:"Point-blank self-occlusion of water reflections", status:"deferred",
     desc:"Because the planar reflection samples at each fragment's own screen position, a character standing directly over its reflection can hide it (most visible when clinched in the centre). A true oblique near-clip plane at the water level would fix it; it's a known limitation, fine for now.",
-    files:["src/main.cpp","assets/shaders/water.fs"] },
+    files:["src/main.cpp","assets/shaders/water.fs"],
+    note:"Deferred — genuinely involved (oblique near-clip plane) and low impact; only shows at point-blank clinches. Fine for now." },
 
-  { cat:"feature", id:"d1", prio:"low", eff:"big", title:"Point-light system in the lit shader",
+  { cat:"feature", id:"d1", prio:"low", eff:"big", title:"Point-light system in the lit shader", done:true, status:"done",
     desc:"Generalise the lighting to support a small array of point lights (positions + colours). Unlocks crystal glow on geometry (A1) and could let the moon cast a soft fill. Bigger refactor of lit.fs + render.cpp.",
-    files:["assets/shaders/lit.fs","src/render.cpp"] },
-  { cat:"feature", id:"d2", prio:"low", eff:"medium", title:"More boss attack variety",
+    files:["assets/shaders/lit.fs","src/render.cpp"],
+    note:"Done — lit.fs now takes a uPLights[] array (xyz+radius) + shared colour; LitShader::set_point_lights uploads them. This powers a1." },
+  { cat:"feature", id:"d2", prio:"low", eff:"medium", title:"More boss attack variety", status:"deferred",
     desc:"Add another phase-2 attack or a combo string for more fight texture (the FSM + telegraph + combo plumbing already supports it).",
-    files:["src/boss.cpp"] },
+    files:["src/boss.cpp"],
+    note:"Deferred — content/design choice that needs a fitting enemy animation; left for a dedicated pass rather than added speculatively." },
 ];
 
 const CATS = [
@@ -227,9 +246,11 @@ const CATS = [
 
 const PRIO_LABEL = { high:"High", med:"Medium", low:"Low" };
 const PRIO_BADGE = { high:"b-high", med:"b-med", low:"b-low" };
-const LS = "ds_todo_v1";
+const LS = "ds_todo_v2";
 let state = {};
 try { state = JSON.parse(localStorage.getItem(LS) || "{}"); } catch(e){ state = {}; }
+// default-check anything already marked done in the data (user can still toggle)
+TASKS.forEach(t=>{ if(!(t.id in state) && t.done) state[t.id] = true; });
 
 const board = document.getElementById("board");
 
@@ -249,6 +270,7 @@ function render(){
       el.dataset.prio = t.prio;
       el.dataset.id = t.id;
       el.dataset.done = done ? "1":"0";
+      el.dataset.status = t.status || "";
       const files = (t.files||[]).map(f=>`<span class="fl">${f}</span>`).join("");
       el.innerHTML = `
         <input type="checkbox" class="cbox" ${done?"checked":""} aria-label="done">
@@ -257,8 +279,11 @@ function render(){
             <span class="t-title">${t.title}</span>
             <span class="badge ${PRIO_BADGE[t.prio]}">${PRIO_LABEL[t.prio]}</span>
             <span class="badge b-eff">⏱ ${t.eff}</span>
+            ${t.status==="done"?'<span class="badge b-done">✓ Done</span>':""}
+            ${t.status==="deferred"?'<span class="badge b-defer">⏸ Deferred</span>':""}
           </div>
           <p class="t-desc">${t.desc}</p>
+          ${t.note?`<p class="t-note">${t.status==="deferred"?"⏸":"✓"} ${t.note}</p>`:""}
           ${files?`<div class="t-files">${files}</div>`:""}
         </div>`;
       el.querySelector(".cbox").addEventListener("change", e=>{

@@ -195,3 +195,20 @@ slider quantization.
     player can react) plus a faint colour sustain. Colour now means parry-ability:
     **orange = normal (parryable)**, **red = heavy/unblockable (cannot parry)** — the
     inverse of the old mapping, per the player's request.
+
+## Next-action pass (worked the to-do.html board)
+
+- **Crystal point lights on geometry** — `lit.fs` now takes `uPLights[32]` (xyz + radius)
+  + a shared colour; `LitShader::set_point_lights` (render.cpp) uploads the cluster
+  positions once (static), so rocks and fighters near a crystal pick up red light, not
+  just the water. Re-used the existing `s_crystal_lights` list (lifted to y=1.0 for the
+  geometry; water still uses xz only).
+- **FX reflect in the water** — `g_fx.draw(mcam)` added to the reflection pass (main.cpp).
+- **Unblockable audio tell** — heavy/red attacks play a deeper swoosh (pitch 0.55) + a
+  low growl in `Boss::start_attack`, so the warning is audible, not just coloured.
+- **Impact wave scales with damage** — `Fx::impact_wave(pos, amount)` (fx.cpp/juice.cpp).
+- **Repo + README** — committed and pushed to GitHub (repo renamed `raylib-dark-souls`);
+  added a Screenshots section + `docs/screenshots/`. Verified the full loop (combat →
+  phase-2 enrage → boss death → VICTORY) via the auto demo.
+- Deferred (logged in to-do.html): oblique near-clip plane for point-blank reflection
+  self-occlusion, more boss attacks, and the optional alpha-blend white trail.

@@ -146,7 +146,10 @@ void Boss::start_attack(const std::string& key) {
     anim.play_fitted(def->anim, def->dur);
     face_instant();
     aim_at_player();
-    g_audio.play("swing", 0.08f, -2.0f, 0.8f);
+    // audio tell: normal attacks get a light swoosh; unblockable (red) attacks get a
+    // deeper swoosh plus an ominous growl so the player is warned by ear, not just colour
+    g_audio.play("swing", 0.08f, -2.0f, def->unblock ? 0.55f : 0.85f);
+    if (def->unblock) g_audio.play("roar", 0.05f, -9.0f, 0.9f);
 }
 void Boss::process_attack(float dt) {
     velocity.x = move_toward(velocity.x, 0.0f, 14.0f * dt);
