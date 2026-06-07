@@ -245,3 +245,10 @@ slider quantization.
   ruined gothic colonnade (10 lit cubes on a ring per the design spec) + translucent ice
   spires. Existing arena rocks + the player/boss are reused, re-lit cold. Verified
   playable (`ice auto` → full fight) and with `ice scenic`.
+- **Crescent moon + detailed surface.** The frozen sky gets a cold **crescent moon**
+  (`moon_crescent.fs` — the disc masked by an offset shadow circle, pale white-blue,
+  limb-darkened; halo from the sky dome). Then a detailed **lunar surface texture** was
+  generated with the **Codex CLI**: `tools/gen_moon_texture.py` (stdlib-only PNG writer,
+  since Python 3.14 lacks Pillow/numpy wheels) → `assets/textures/moon/moon_surface.png`
+  (1024² craters/maria/noise). The crescent shader samples it with a spherical-ish warp
+  + wider contrast so craters read on the lit limb. (The blood moon keeps `blood_moon.png`.)

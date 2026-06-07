@@ -19,9 +19,14 @@ void main() {
     if (lit < 0.02) discard;               // cut away the shadowed part -> shows sky
 
     float limb = pow(clamp(z, 0.0, 1.0), 0.42);
-    vec2 uv = p * 0.5 + 0.5;
-    float tex = dot(texture(texture0, uv).rgb, vec3(0.33));
-    float detail = mix(0.85, 1.08, clamp(tex * 1.4, 0.0, 1.0));
+
+    // spherical-ish warp so the crater surface wraps the disc (less limb stretch)
+    vec2 uvp = p * 0.5 + 0.5;
+    vec2 uvs = vec2(0.5) + vec2(asin(clamp(p.x, -1.0, 1.0)),
+                                asin(clamp(p.y, -1.0, 1.0))) / 3.14159;
+    vec2 uv = mix(uvp, uvs, 0.55);
+    float tex = texture(texture0, uv).r;
+    float detail = mix(0.55, 1.18, clamp(tex, 0.0, 1.0));   // craters/maria read clearly
 
     vec3 body = vec3(0.82, 0.92, 1.08);    // cold pale moon
     vec3 col = body * detail * (0.55 + 0.5 * limb) * lit;

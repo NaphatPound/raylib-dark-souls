@@ -119,7 +119,9 @@ void load(Shader lit) {
     // pole pinching), mapping the crater texture and masking to a circular disc.
     Mesh disc = GenMeshPlane(48.0f, 48.0f, 1, 1);
     s_moon = LoadModelFromMesh(disc);
-    s_moon.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = assets::texture("textures/moon/blood_moon.png");
+    const char* moon_tex = (g_level == LEVEL_FROZEN) ? "textures/moon/moon_surface.png"
+                                                     : "textures/moon/blood_moon.png";
+    s_moon.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = assets::texture(moon_tex);
     const char* moon_fs = (g_level == LEVEL_FROZEN) ? "shaders/moon_crescent.fs" : "shaders/moon.fs";
     s_moon_shader = LoadShader(assets::path("shaders/moon.vs").c_str(),
                                assets::path(moon_fs).c_str());
