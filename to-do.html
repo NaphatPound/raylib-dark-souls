@@ -211,7 +211,7 @@ const TASKS = [
   { cat:"polish", id:"b4", prio:"low", eff:"~5 min", title:"Optional: pure-white sword trail over the moon", done:true, status:"done",
     desc:"The trail is additive white, so where it crosses the very bright blood-moon it blends slightly pink. If you want it pure white everywhere, switch it to an alpha-blended white.",
     files:["src/player.cpp"],
-    note:"Done — trail switched to alpha-blended pure white, which washes toward white over any background (no more pink over the moon); softened to a low peak + depth-write-off so it stays a subtle wisp." },
+    note:"Done — trail is alpha-blended pure white (no more pink over the moon). Follow-up: raised the leading-edge alpha so it also reads over the bright sky, fixing a 'heavy-attack trail not showing' bug (the 360-spin holds the blade up over the bright moon where low-alpha white was invisible)." },
 
   { cat:"issue", id:"a1", prio:"med", eff:"~1-2 hrs", title:"Crystals light the water but not the rocks/fighters", done:true, status:"done",
     desc:"The red glow only pools on the water surface. The lit shader has a single directional (moon) light and no point lights, so nearby monoliths and the fighters' legs aren't lit by the crystals. Adding point-light support would make the red glow spill onto geometry too.",

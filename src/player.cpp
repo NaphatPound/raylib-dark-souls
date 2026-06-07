@@ -531,8 +531,8 @@ void Player::draw_sword_trail() {
         const SwordTrailSeg& b = sword_trail_[i];
         float fa = 1.0f - a.age / trail_life_;  fa = fa * fa * fa;   // 1 near blade -> 0 far
         float fb = 1.0f - b.age / trail_life_;  fb = fb * fb * fb;
-        unsigned char ta = (unsigned char)(90.0f * fa);
-        unsigned char tb = (unsigned char)(90.0f * fb);
+        unsigned char ta = (unsigned char)(160.0f * fa);
+        unsigned char tb = (unsigned char)(160.0f * fb);
         rlColor4ub(255, 255, 255, (unsigned char)(ta * 0.40f)); rlVertex3f(a.base.x, a.base.y, a.base.z);
         rlColor4ub(255, 255, 255, ta);                          rlVertex3f(a.tip.x, a.tip.y, a.tip.z);
         rlColor4ub(255, 255, 255, tb);                          rlVertex3f(b.tip.x, b.tip.y, b.tip.z);

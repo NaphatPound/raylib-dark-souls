@@ -218,3 +218,13 @@ slider quantization.
     toggled per-pass in `main.cpp`) — the reflection only mirrors above-water geometry.
   - **New phase-2 boss attack** (`boss.cpp`) — an unblockable `zombie_scream` roar-slam
     added to the phase-2 pool (red telegraph + growl cue); verified through to victory.
+
+- **BUG: heavy-attack sword trail not showing.** A debug trace confirmed the trail
+  *was* emitting segments for the heavy attack (the autopilot only ever did light
+  attacks, so heavy was never exercised). The cause was the b4 alpha-blend change: the
+  heavy `standing_melee_attack_360_high` spin holds the blade up at head height right
+  over the **bright** moon/sky, where 35%-alpha white only nudges the already-bright
+  red a little → invisible (the light attacks swing lower over darker areas, so they
+  still read). **Fix** (`player.cpp`): raised the trail's leading-edge alpha (90→160);
+  the cubic falloff keeps the tail clear, so it now reads over bright backgrounds for
+  both attacks while staying a concentrated wisp.
