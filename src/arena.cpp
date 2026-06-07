@@ -119,10 +119,10 @@ void load(Shader lit) {
     // pole pinching), mapping the crater texture and masking to a circular disc.
     Mesh disc = GenMeshPlane(48.0f, 48.0f, 1, 1);
     s_moon = LoadModelFromMesh(disc);
-    const char* moon_tex = (g_level == LEVEL_FROZEN) ? "textures/moon/moon_surface.png"
-                                                     : "textures/moon/blood_moon.png";
-    s_moon.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = assets::texture(moon_tex);
-    const char* moon_fs = (g_level == LEVEL_FROZEN) ? "shaders/moon_crescent.fs" : "shaders/moon.fs";
+    const char* moon_tex_by[3] = { "textures/moon/blood_moon.png", "textures/moon/moon_surface.png", "textures/moon/blood_moon.png" };
+    const char* moon_fs_by[3]  = { "shaders/moon.fs", "shaders/moon_crescent.fs", "shaders/moon.fs" };
+    s_moon.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = assets::texture(moon_tex_by[g_level]);
+    const char* moon_fs = moon_fs_by[g_level];
     s_moon_shader = LoadShader(assets::path("shaders/moon.vs").c_str(),
                                assets::path(moon_fs).c_str());
     s_moon.materials[0].shader = s_moon_shader;
@@ -133,18 +133,18 @@ void load(Shader lit) {
     // view and the reflection pass.
     Mesh dome = GenMeshSphere(1.0f, 16, 32);
     s_sky = LoadModelFromMesh(dome);
-    const char* sky_fs = (g_level == LEVEL_FROZEN) ? "shaders/sky_ice.fs" : "shaders/sky.fs";
+    const char* sky_fs_by[3] = { "shaders/sky.fs", "shaders/sky_ice.fs", "shaders/sky_forge.fs" };
     s_sky_shader = LoadShader(assets::path("shaders/sky.vs").c_str(),
-                              assets::path(sky_fs).c_str());
+                              assets::path(sky_fs_by[g_level]).c_str());
     s_sky.materials[0].shader = s_sky_shader;
     s_loc_sky_moon = GetShaderLocation(s_sky_shader, "uMoonDir");
 
     // reflective water plane (subdivided so the vertex waves have shape)
     Mesh plane = GenMeshPlane(320.0f, 320.0f, 80, 80);
     s_water = LoadModelFromMesh(plane);
-    const char* water_fs = (g_level == LEVEL_FROZEN) ? "shaders/water_ice.fs" : "shaders/water.fs";
+    const char* water_fs_by[3] = { "shaders/water.fs", "shaders/water_ice.fs", "shaders/water_forge.fs" };
     s_water_shader = LoadShader(assets::path("shaders/water.vs").c_str(),
-                                assets::path(water_fs).c_str());
+                                assets::path(water_fs_by[g_level]).c_str());
     s_water_shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(s_water_shader, "matModel");
     s_loc_time = GetShaderLocation(s_water_shader, "uTime");
     s_loc_view = GetShaderLocation(s_water_shader, "uViewPos");
@@ -168,16 +168,17 @@ void load(Shader lit) {
         SetShaderValueV(s_water_shader, s_loc_cry_arr, s_crystal_lights.data(),
                         SHADER_UNIFORM_VEC4, cn);
     // same crystal lights illuminate the rocks/fighters via the lit shader
-    Vector3 pcol = (g_level == LEVEL_FROZEN) ? Vector3{ 0.26f, 0.55f, 0.85f }   // ice-blue glow
-                                             : Vector3{ 0.85f, 0.14f, 0.10f };  // red glow
-    g_lit.set_point_lights(s_crystal_lights.data(), cn, pcol);
+    Vector3 pcol_by[3] = { { 0.85f, 0.14f, 0.10f },    // blood: red
+                           { 0.26f, 0.55f, 0.85f },    // frozen: ice-blue
+                           { 0.95f, 0.42f, 0.10f } };  // forge: ember-orange
+    g_lit.set_point_lights(s_crystal_lights.data(), cn, pcol_by[g_level]);
 }
 
 void update(float dt) { s_time += dt; }
 
 // ---------------------------------------------------------------- draw
 static void draw_crystals();
-static void draw_ice_props();
+static void draw_level_props();
 
 // Background dome: filled before the scenery in every pass so the sky is never an
 // empty void (which is what made the water reflect black). Drawn with culling off
@@ -192,14 +193,15 @@ void draw_sky(Camera3D cam) {
 
 void draw_world(Camera3D cam) {
     (void)cam;
-    // sky moon: a full blood moon in the ruin, a cold crescent in the frozen cathedral
-    if (s_has_moon)
+    // sky moon: full blood moon in the ruin, cold crescent in the cathedral; the forge
+    // is a lava cavern with no moon
+    if (s_has_moon && g_level != LEVEL_FORGE)
         DrawModelEx(s_moon, MOON_POS, Vector3{ 1, 0, 0 }, 90.0f, Vector3{ 1, 1, 1 }, WHITE);
     if (s_has_model)
         for (int i = 0; i < s_model.meshCount; i++)
             if (!s_skip_mesh[i])
                 DrawMesh(s_model.meshes[i], s_model.materials[s_model.meshMaterial[i]], s_model.transform);
-    if (g_level == LEVEL_FROZEN) draw_ice_props();
+    if (g_level != LEVEL_BLOODMOON) draw_level_props();
     draw_crystals();
 }
 
@@ -217,42 +219,47 @@ static void place_gem(const Gem& g) {
 }
 
 static void draw_crystals() {
-    bool ice = (g_level == LEVEL_FROZEN);
-    // gem bodies + soft facet lines (mostly opaque -> depth write stays on).
-    // blood-moon = cloudy deep red; frozen = translucent ice-blue shards.
+    // per-level gem tints: blood = cloudy red, frozen = ice-blue, forge = ember-orange.
+    // bodyRGB at shade 1, edgeRGB, haloA(rgb), haloB(rgb), body alpha.
+    int L = g_level;
+    Vector3 bodyC[3] = { {165,30,27}, {120,175,225}, {210,90,25} };
+    Vector3 edgeC[3] = { {95,18,16},  {170,225,250}, {255,170,60} };
+    Vector3 h0C[3]   = { {200,30,24}, {110,200,255}, {255,120,35} };
+    Vector3 h1C[3]   = { {165,24,18}, {80,160,235},  {220,90,25} };
+    unsigned char bodyA = (L == LEVEL_FROZEN) ? 180 : 210;
+
     BeginBlendMode(BLEND_ALPHA);
     for (auto& c : s_crystals) {
         for (auto& g : c.gems) {
             place_gem(g);
             float s = g.shade;
-            Color body = ice ? Color{ (unsigned char)(120 * s), (unsigned char)(175 * s), (unsigned char)(225 * s), 180 }
-                             : Color{ (unsigned char)(165 * s), (unsigned char)(30 * s),  (unsigned char)(27 * s),  212 };
-            DrawCubeV(Vector3{ 0, 0, 0 }, g.size, body);
-            Color edge = ice ? Color{ (unsigned char)(170 * s), (unsigned char)(225 * s), (unsigned char)(250 * s), 210 }
-                             : Color{ (unsigned char)(95 * s),  (unsigned char)(18 * s),  (unsigned char)(16 * s),  225 };
-            DrawCubeWiresV(Vector3{ 0, 0, 0 }, g.size, edge);
+            DrawCubeV(Vector3{ 0, 0, 0 }, g.size,
+                      Color{ (unsigned char)(bodyC[L].x * s), (unsigned char)(bodyC[L].y * s), (unsigned char)(bodyC[L].z * s), bodyA });
+            DrawCubeWiresV(Vector3{ 0, 0, 0 }, g.size,
+                      Color{ (unsigned char)(edgeC[L].x * s), (unsigned char)(edgeC[L].y * s), (unsigned char)(edgeC[L].z * s), 215 });
             rlPopMatrix();
         }
     }
     EndBlendMode();
 
-    // soft static light halo (red / ice-blue)
+    // soft static additive light halo
     BeginBlendMode(BLEND_ADDITIVE);
     for (auto& c : s_crystals) {
-        Color h0 = ice ? Color{ 110, 200, 255, 95 } : Color{ 200, 30, 24, 85 };
-        Color h1 = ice ? Color{ 80, 160, 235, 34 }  : Color{ 165, 24, 18, 30 };
-        DrawSphereEx(c.light_pos, 0.42f, 8, 8, h0);
-        DrawSphereEx(c.light_pos, 0.95f, 8, 8, h1);
+        DrawSphereEx(c.light_pos, 0.42f, 8, 8, Color{ (unsigned char)h0C[L].x, (unsigned char)h0C[L].y, (unsigned char)h0C[L].z, 90 });
+        DrawSphereEx(c.light_pos, 0.95f, 8, 8, Color{ (unsigned char)h1C[L].x, (unsigned char)h1C[L].y, (unsigned char)h1C[L].z, 32 });
     }
     EndBlendMode();
 }
 
-// Frozen-cathedral scenery: a ruined gothic colonnade (lit cubes, so they take the cold
-// light + fog) ringing the lake, plus jagged translucent ice spires nearer the centre.
-// Layout follows design/frozen_cathedral_design.md.
-static void draw_ice_props() {
+// Frozen/forge scenery: a ruined colonnade (lit cubes, so they take the level's light +
+// fog) ringing the lake, plus jagged spires nearer the centre. Frozen = blue-grey stone +
+// translucent ice spires; forge = dark obsidian + glowing ember spires. Layout follows
+// design/frozen_cathedral_design.md.
+static void draw_level_props() {
     if (!s_has_column) return;
-    Color stone{ 78, 96, 110, 255 };          // desaturated blue-grey ice-stone (lit tint)
+    bool forge = (g_level == LEVEL_FORGE);
+    Color stone = forge ? Color{ 34, 26, 28, 255 }     // dark obsidian
+                        : Color{ 78, 96, 110, 255 };    // blue-grey ice-stone
     static const float colAng[10] = { 0, 35, 72, 112, 151, 204, 238, 276, 315, 342 };
     for (int i = 0; i < 10; i++) {
         float a = colAng[i] * DEG2RAD;
@@ -261,10 +268,11 @@ static void draw_ice_props() {
         float h = 7.0f + (float)((i * 7) % 9);                       // 7..15 varied
         float yaw = colAng[i];
         DrawModelEx(s_column, Vector3{ p.x, h * 0.5f, p.z }, Vector3{ 0, 1, 0 }, yaw, Vector3{ 1.5f, h, 1.5f }, stone);
-        // broken cap block, slightly turned
         DrawModelEx(s_column, Vector3{ p.x, h + 0.35f, p.z }, Vector3{ 0, 1, 0 }, yaw + 22.0f, Vector3{ 2.1f, 0.7f, 2.1f }, stone);
     }
-    // jagged ice spires (translucent ice-blue), inner ring
+    // jagged spires (translucent ice-blue / glowing ember), inner ring
+    Color spire = forge ? Color{ 230, 110, 35, 165 } : Color{ 150, 205, 240, 150 };
+    Color spireGlow = forge ? Color{ 255, 130, 40, 95 } : Color{ 110, 200, 255, 80 };
     static const float spAng[7] = { 18, 66, 139, 188, 247, 292, 333 };
     BeginBlendMode(BLEND_ALPHA);
     for (int i = 0; i < 7; i++) {
@@ -273,18 +281,16 @@ static void draw_ice_props() {
         Vector3 b = boundary_center + Vector3{ sinf(a) * r, -0.2f, cosf(a) * r };
         float h = 3.5f + (float)((i * 3) % 6);                       // 3.5..9
         float rad = 0.45f + 0.12f * (i % 3);
-        DrawCylinderEx(b, b + Vector3{ 0.2f * sinf(a), h, 0.2f * cosf(a) }, rad, 0.04f, 5,
-                       Color{ 150, 205, 240, 150 });
+        DrawCylinderEx(b, b + Vector3{ 0.2f * sinf(a), h, 0.2f * cosf(a) }, rad, 0.04f, 5, spire);
     }
     EndBlendMode();
-    // additive cold glow at the spire tips
     BeginBlendMode(BLEND_ADDITIVE);
     for (int i = 0; i < 7; i++) {
         float a = spAng[i] * DEG2RAD;
         float r = 17.0f + (float)((i * 5) % 7);
         float h = 3.5f + (float)((i * 3) % 6);
         Vector3 tip = boundary_center + Vector3{ sinf(a) * r + 0.2f * sinf(a), h - 0.2f, cosf(a) * r + 0.2f * cosf(a) };
-        DrawSphereEx(tip, 0.30f, 6, 6, Color{ 110, 200, 255, 80 });
+        DrawSphereEx(tip, 0.30f, 6, 6, spireGlow);
     }
     EndBlendMode();
 }

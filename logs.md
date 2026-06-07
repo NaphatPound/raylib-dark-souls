@@ -252,3 +252,24 @@ slider quantization.
   since Python 3.14 lacks Pillow/numpy wheels) → `assets/textures/moon/moon_surface.png`
   (1024² craters/maria/noise). The crescent shader samples it with a spherical-ish warp
   + wider contrast so craters read on the lit limb. (The blood moon keeps `blood_moon.png`.)
+
+## Game shell: start menu, level select, save, bonfire (+ 3rd level)
+
+- **3rd level — Volcanic Forge** (`LEVEL_FORGE`, `forge`/`lava` arg): same `g_level`
+  re-theme pattern — hot orange lighting, dark smoky/ember sky (`sky_forge.fs`),
+  emissive flowing **lava lake** (`water_forge.fs`, value-noise, not reflective),
+  ember-orange crystals + point light, dark obsidian colonnade + ember spires
+  (`draw_level_props`, renamed from `draw_ice_props` and themed). All shader/colour
+  selection in arena.cpp is now 3-entry arrays indexed by `g_level`.
+- **Save system** (`src/save.{h,cpp}`): `SaveData{ beaten[3], last_level }` <-> a tiny
+  `savegame.txt` via raylib `SaveFileText`/`LoadFileText`. gitignored.
+- **Start menu + level-select** (`main.cpp` `draw_start_menu`): launching with no args
+  shows a keyboard menu listing the 3 levels (beaten = "cleared", cursor starts on
+  `last_level`); free-select any. `auto`/explicit level arg skip the menu.
+- **Restructured `main()`** into a `APP_MENU` <-> `APP_PLAY` loop with `load_level(lvl)` /
+  `unload_level()` lambdas (g_lit + arena + player/boss are loaded/unloaded per level;
+  `init()` already sets `g_game.player/boss`). Pause "Quit" now returns to the menu.
+- **Bonfire** (`draw_bonfire`): on VICTORY a Dark-Souls bonfire (ash mound + coiled
+  sword + flickering additive flames) ignites at a fixed spot; walking within range +
+  `E` = rest -> `g_save.beaten[g_level]=true; save_write()` -> back to the menu. The
+  VICTORY screen text now points at the bonfire instead of an instant restart.

@@ -19,15 +19,22 @@
 #include "hud.h"
 #include "screens.h"
 #include "pause_menu.h"
+#include "save.h"
 #include <vector>
+#include <cstdio>
+
+// ---- start-menu + bonfire drawing helpers (defined below main) ----
+static void draw_start_menu(int sel);
+static void draw_bonfire(Vector3 pos, float t);
 
 int main(int argc, char** argv) {
-    bool auto_demo = false, diag = false, scenic = false;
+    bool auto_demo = false, diag = false, scenic = false, level_arg = false;
     for (int i = 1; i < argc; i++) {
         if (TextIsEqual(argv[i], "auto")) auto_demo = true;
         if (TextIsEqual(argv[i], "diag")) diag = true;
         if (TextIsEqual(argv[i], "scenic")) scenic = true;
-        if (TextIsEqual(argv[i], "ice") || TextIsEqual(argv[i], "frozen")) g_level = LEVEL_FROZEN;
+        if (TextIsEqual(argv[i], "ice") || TextIsEqual(argv[i], "frozen")) { g_level = LEVEL_FROZEN; level_arg = true; }
+        if (TextIsEqual(argv[i], "forge") || TextIsEqual(argv[i], "lava")) { g_level = LEVEL_FORGE; level_arg = true; }
     }
 
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
@@ -139,7 +146,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    g_lit.load();
+    // ---- per-session systems; the level itself is loaded/unloaded on demand ----
     g_fx.init();
     g_audio.init();
     g_juice.init();
@@ -147,34 +154,74 @@ int main(int argc, char** argv) {
 
     HUD hud; hud.init();
     Screens screens; screens.init();
+    save_load();
 
-    arena::load(g_lit.shader);
-
-    Player player; player.init({ 0, 0, 16 }); player.apply_shader(g_lit.shader);
-    Boss boss;     boss.init({ 0, 0, -10 }); boss.apply_shader(g_lit.shader);
-
+    Player player;
+    Boss boss;
     PauseMenu pause; pause.player = &player;
 
+    const Vector3 PLAYER_SPAWN{ 0, 0, 16 }, BOSS_SPAWN{ 0, 0, -10 }, BONFIRE_POS{ 0, 0, 7 };
+
     g_game.restart_requested.connect([&]() {
-        player.pos = { 0, 0, 16 }; player.reset_state();
-        boss.pos = { 0, 0, -10 };  boss.reset_state();
+        player.pos = PLAYER_SPAWN; player.reset_state();
+        boss.pos = BOSS_SPAWN;     boss.reset_state();
     });
 
-    g_game.set_state(Game::TITLE);
-    DisableCursor();
-    player.autopilot = auto_demo;
-
     RenderTexture2D reflect = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    std::vector<Hurtbox*> boss_targets, player_targets;
+    bool level_loaded = false;
+
+    auto load_level = [&](int lvl) {
+        g_level = lvl;
+        g_lit.load();
+        arena::load(g_lit.shader);
+        player.init(PLAYER_SPAWN); player.apply_shader(g_lit.shader);
+        boss.init(BOSS_SPAWN);     boss.apply_shader(g_lit.shader);
+        boss_targets   = { &boss.hurtbox };
+        player_targets = { &player.hurtbox };
+        player.autopilot = auto_demo;
+        g_game.set_state(Game::TITLE);
+        level_loaded = true;
+    };
+    auto unload_level = [&]() {
+        if (!level_loaded) return;
+        player.unload(); boss.unload();
+        arena::unload(); g_lit.unload();
+        level_loaded = false;
+    };
+
+    enum AppState { APP_MENU, APP_PLAY };
+    int app = APP_MENU;
+    int menu_sel = g_save.last_level;
+    bool paused = false, bonfire_lit = false;
     long frame = 0;
-    bool paused = false;
-    std::vector<Hurtbox*> boss_targets   = { &boss.hurtbox };   // what the player can hit
-    std::vector<Hurtbox*> player_targets = { &player.hurtbox }; // what the boss can hit
+
+    // CLI shortcut: `auto` or an explicit level arg skip the menu and play directly
+    if (auto_demo || level_arg) { load_level(g_level); app = APP_PLAY; DisableCursor(); }
 
     while (!WindowShouldClose()) {
         float real_dt = GetFrameTime();
         if (real_dt > 0.05f) real_dt = 0.05f;
-        g_juice.update(real_dt);
         g_audio.update(real_dt);
+
+        // -------------------------------------------------------- START MENU
+        if (app == APP_MENU) {
+            if (IsCursorHidden()) EnableCursor();
+            if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) menu_sel = (menu_sel + 1) % NUM_LEVELS;
+            if (IsKeyPressed(KEY_UP)   || IsKeyPressed(KEY_W)) menu_sel = (menu_sel + NUM_LEVELS - 1) % NUM_LEVELS;
+            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_E)) {
+                load_level(menu_sel); app = APP_PLAY; bonfire_lit = false; paused = false; DisableCursor();
+            }
+            BeginDrawing();
+            ClearBackground(Color{ 8, 6, 10, 255 });
+            draw_start_menu(menu_sel);
+            if (IsKeyPressed(KEY_F2)) TakeScreenshot("shot.png");
+            EndDrawing();
+            continue;
+        }
+
+        // -------------------------------------------------------- PLAY
+        g_juice.update(real_dt);
 
         if (IsKeyPressed(KEY_ESCAPE)) {
             if (!(g_game.state == Game::DEAD || g_game.state == Game::VICTORY)) {
@@ -185,6 +232,7 @@ int main(int argc, char** argv) {
             }
         }
 
+        bool near_bonfire = false;
         if (!paused) {
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !IsCursorHidden()) DisableCursor();
 
@@ -209,11 +257,23 @@ int main(int argc, char** argv) {
             g_fx.update(dt);
             hud.update(real_dt);
 
-            if (g_game.state == Game::DEAD || g_game.state == Game::VICTORY) {
+            if (g_game.state == Game::DEAD) {                 // die -> retry the level
                 if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER))
                     g_game.request_restart();
+            } else if (g_game.state == Game::VICTORY) {        // win -> a bonfire ignites
+                bonfire_lit = true;
+                Vector3 bd = player.pos - BONFIRE_POS; bd.y = 0;
+                near_bonfire = Vector3Length(bd) < 2.6f;
+                if (near_bonfire && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER))) {
+                    g_save.beaten[g_level] = true;             // rest = save progress, return to menu
+                    g_save.last_level = g_level;
+                    save_write();
+                    unload_level();
+                    menu_sel = g_level; app = APP_MENU; bonfire_lit = false;
+                }
             }
         }
+        if (app == APP_MENU) continue;   // rested at the bonfire -> show the menu next frame
 
         // --- planar reflection pass: render scenery from a water-mirrored camera ---
         if (reflect.texture.width != GetScreenWidth() || reflect.texture.height != GetScreenHeight()) {
@@ -254,17 +314,29 @@ int main(int argc, char** argv) {
             boss.draw();
             arena::draw_water(player.camera, reflect.texture, screen);
             g_fx.draw(player.camera);
+            if (bonfire_lit) draw_bonfire(BONFIRE_POS, (float)GetTime());
         EndMode3D();
 
         hud.draw();
         screens.draw();
+        if (bonfire_lit && !paused) {                        // bonfire rest hint
+            int sw = GetScreenWidth(), sh = GetScreenHeight();
+            const char* msg = near_bonfire ? "Press  E  to rest at the bonfire"
+                                           : "Walk to the bonfire to rest";
+            Color mc = near_bonfire ? Color{ 255, 200, 110, 255 } : Color{ 200, 170, 120, 200 };
+            DrawText(msg, sw / 2 - MeasureText(msg, 22) / 2, sh - 96, 22, mc);
+        }
         if (paused) {
             pause.draw_and_update();
             if (pause.resume_requested) { paused = false; g_game.paused = false; DisableCursor(); }
-            if (pause.quit_requested) break;
+            if (pause.quit_requested) {                      // quit to the start menu
+                unload_level(); menu_sel = g_level; app = APP_MENU;
+                paused = false; g_game.paused = false; bonfire_lit = false;
+            }
         }
         if (IsKeyPressed(KEY_F2)) TakeScreenshot("shot.png");
         EndDrawing();
+        if (app == APP_MENU) continue;   // quit-to-menu from pause
 
         frame++;
         if (auto_demo) {
@@ -282,14 +354,54 @@ int main(int argc, char** argv) {
         }
     }
 
+    unload_level();
     UnloadRenderTexture(reflect);
-    player.unload();
-    boss.unload();
-    arena::unload();
-    g_lit.unload();
     assets::unload_all();
     g_audio.shutdown();
     CloseAudioDevice();
     CloseWindow();
     return 0;
+}
+
+// ---------------------------------------------------------------- menu + bonfire
+static void draw_start_menu(int sel) {
+    int sw = GetScreenWidth(), sh = GetScreenHeight();
+    const char* title = "DARK SOULS";
+    DrawText(title, sw / 2 - MeasureText(title, 70) / 2, sh / 6, 70, Color{ 196, 38, 30, 255 });
+    const char* sub = "raylib port  -  select your world";
+    DrawText(sub, sw / 2 - MeasureText(sub, 20) / 2, sh / 6 + 84, 20, Color{ 150, 140, 132, 255 });
+
+    int y = sh / 2 - 40;
+    for (int i = 0; i < NUM_LEVELS; i++) {
+        bool on = (i == sel);
+        Color c = on ? Color{ 255, 222, 130, 255 } : Color{ 150, 142, 132, 255 };
+        int fs = 32, x = sw / 2 - 230;
+        if (on) DrawText(">", x - 34, y, fs, c);
+        DrawText(level_name(i), x, y, fs, c);
+        if (g_save.beaten[i])
+            DrawText("- cleared", x + 300, y + 6, 22, Color{ 120, 190, 120, 255 });
+        y += 56;
+    }
+    const char* hint = "W / S  or  Up / Down to choose      Enter  to enter";
+    DrawText(hint, sw / 2 - MeasureText(hint, 18) / 2, sh - 70, 18, Color{ 120, 115, 110, 255 });
+    const char* hint2 = "Beat the boss, then rest at the bonfire to save.";
+    DrawText(hint2, sw / 2 - MeasureText(hint2, 16) / 2, sh - 44, 16, Color{ 95, 90, 86, 255 });
+}
+
+static void draw_bonfire(Vector3 pos, float t) {
+    // ash mound + a coiled sword stuck in it
+    DrawCylinderEx(pos, pos + Vector3{ 0, 0.16f, 0 }, 0.95f, 1.05f, 12, Color{ 32, 27, 25, 255 });
+    DrawCylinderEx(pos + Vector3{ 0, 0.12f, 0 }, pos + Vector3{ 0, 0.45f, 0 }, 0.72f, 0.42f, 10, Color{ 22, 17, 15, 255 });
+    DrawCylinderEx(pos + Vector3{ 0, 0.30f, 0 }, pos + Vector3{ 0.05f, 1.75f, 0 }, 0.045f, 0.018f, 6, Color{ 120, 122, 132, 255 });
+    DrawCube(pos + Vector3{ 0.02f, 0.62f, 0 }, 0.24f, 0.05f, 0.05f, Color{ 96, 98, 108, 255 });   // guard
+    // flames (additive, flickering)
+    BeginBlendMode(BLEND_ADDITIVE);
+    for (int i = 0; i < 7; i++) {
+        float a = i * 0.92f;
+        float fl = 0.5f + 0.5f * sinf(t * 7.0f + a * 2.3f);
+        Vector3 fp = pos + Vector3{ 0.20f * sinf(a + t * 1.4f), 0.42f + (0.35f + 0.55f * fl) * 0.5f, 0.20f * cosf(a * 1.3f + t) };
+        DrawSphereEx(fp, 0.17f + 0.11f * fl, 6, 6, Color{ 255, (unsigned char)(135 + 90 * fl), 28, 120 });
+    }
+    DrawSphereEx(pos + Vector3{ 0, 0.7f, 0 }, 1.15f, 8, 8, Color{ 255, 120, 30, 42 });   // glow
+    EndBlendMode();
 }

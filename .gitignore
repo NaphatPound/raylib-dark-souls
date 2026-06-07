@@ -11,3 +11,6 @@ shot.png
 /demo_*.png
 /cmb_*.png
 /_*.png
+
+# runtime save file
+savegame.txt

@@ -3,8 +3,8 @@
 #include "signal.h"
 #include "actor.h"
 
-// Selectable level / visual theme (set once at startup from the CLI).
-enum Level { LEVEL_BLOODMOON = 0, LEVEL_FROZEN = 1 };
+// Selectable level / visual theme (chosen in the start menu or via the CLI).
+enum Level { LEVEL_BLOODMOON = 0, LEVEL_FROZEN = 1, LEVEL_FORGE = 2 };
 extern int g_level;
 
 struct Game {

@@ -36,6 +36,12 @@ void LitShader::load() {
         ambient  = { 0.70f, 0.84f, 1.05f };                          // pale icy ambient (lifted)
         fogCol   = { 0.72f, 0.83f, 0.92f };                          // milky cold haze (#D8EEF3-ish)
         fogDen   = 0.0120f;                                          // low-hanging cold mist
+    } else if (g_level == LEVEL_FORGE) {                             // hot volcanic-forge lighting
+        lightDir = Vector3Normalize({ 0.10f, 0.55f, 0.40f });        // low warm light
+        lightCol = { 1.35f, 0.70f, 0.34f };                          // hot orange
+        ambient  = { 0.80f, 0.42f, 0.28f };                          // warm dim ambient (lava bounce)
+        fogCol   = { 0.34f, 0.11f, 0.06f };                          // smoky orange-black
+        fogDen   = 0.0052f;
     }
     float   emissive = 0.0f;
     SetShaderValue(shader, loc_lightDir, &lightDir, SHADER_UNIFORM_VEC3);
