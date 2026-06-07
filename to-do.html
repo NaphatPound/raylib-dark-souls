@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Souls (raylib) — Project To-Do</title>
+<style>
+  :root{
+    --bg:#15100f; --panel:#1f1715; --panel2:#261c19; --line:#3a2b27;
+    --text:#e3d8c6; --muted:#9a8b7e; --accent:#c2241d; --accent2:#ff3b2e;
+    --gold:#d39a36; --orange:#e07a2a; --green:#6f9a63;
+    --hi:#e0392f; --med:#d9962e; --lo:#7d8a93;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -120px,#3a0d0c 0%,var(--bg) 60%) fixed,var(--bg);
+    color:var(--text); font:15px/1.55 "Segoe UI",system-ui,sans-serif;
+    padding:32px 18px 80px;
+  }
+  .wrap{max-width:960px;margin:0 auto}
+  header{text-align:center;margin-bottom:18px}
+  h1{
+    font-size:30px;margin:0 0 4px;letter-spacing:.5px;
+    color:#f1e6d4;text-shadow:0 2px 18px rgba(194,36,29,.6)
+  }
+  h1 .blood{color:var(--accent2)}
+  .sub{color:var(--muted);font-size:13.5px}
+  .sub b{color:var(--gold)}
+
+  .bar{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;margin:18px 0;box-shadow:0 6px 24px rgba(0,0,0,.4)
+  }
+  .progress-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .progress-track{flex:1;min-width:220px;height:14px;background:#120c0b;border-radius:8px;border:1px solid var(--line);overflow:hidden}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .35s ease}
+  .progress-label{font-variant-numeric:tabular-nums;color:var(--gold);font-weight:600;white-space:nowrap}
+  .counts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .pill{font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--muted)}
+  .pill b{color:var(--text)}
+
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 6px;align-items:center}
+  .filters .flabel{color:var(--muted);font-size:13px;margin-right:2px}
+  .fbtn{
+    cursor:pointer;font:inherit;font-size:13px;padding:5px 13px;border-radius:8px;
+    border:1px solid var(--line);background:var(--panel);color:var(--text);transition:.15s
+  }
+  .fbtn:hover{border-color:var(--accent)}
+  .fbtn.active{background:var(--accent);border-color:var(--accent2);color:#fff}
+  .ghost{margin-left:auto;background:transparent;color:var(--muted);border-color:transparent}
+  .ghost:hover{color:var(--accent2)}
+
+  section{margin:26px 0 8px}
+  .cat{
+    display:flex;align-items:center;gap:10px;margin:0 0 10px;
+    font-size:18px;color:#f0e4d2;border-bottom:1px solid var(--line);padding-bottom:8px
+  }
+  .cat .emoji{font-size:20px}
+  .cat .ct{margin-left:auto;font-size:12px;color:var(--muted);font-weight:400}
+
+  .task{
+    display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);
+    border-left:4px solid var(--lo);border-radius:10px;padding:13px 15px;margin:9px 0;
+    transition:.2s; align-items:flex-start
+  }
+  .task:hover{border-color:#4a3531;background:var(--panel2)}
+  .task[data-prio="high"]{border-left-color:var(--hi)}
+  .task[data-prio="med"]{border-left-color:var(--med)}
+  .task[data-prio="low"]{border-left-color:var(--lo)}
+  .task.done{opacity:.5}
+  .task.done .t-title{text-decoration:line-through;text-decoration-color:var(--accent)}
+
+  .cbox{appearance:none;-webkit-appearance:none;min-width:22px;height:22px;margin-top:2px;
+    border:2px solid #5a443e;border-radius:6px;background:#140d0c;cursor:pointer;position:relative;transition:.15s}
+  .cbox:hover{border-color:var(--accent2)}
+  .cbox:checked{background:var(--accent);border-color:var(--accent2)}
+  .cbox:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
+
+  .t-body{flex:1;min-width:0}
+  .t-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .t-title{font-weight:600;color:#f1e7d6;font-size:15.5px}
+  .badge{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+  .b-high{background:rgba(224,57,47,.18);color:#ff6a60;border:1px solid rgba(224,57,47,.4)}
+  .b-med{background:rgba(217,150,46,.16);color:#f0b35a;border:1px solid rgba(217,150,46,.4)}
+  .b-low{background:rgba(125,138,147,.14);color:#aab6bd;border:1px solid rgba(125,138,147,.35)}
+  .b-eff{background:#241b18;color:var(--muted);border:1px solid var(--line)}
+  .t-desc{color:#cfc3b2;margin:6px 0 0;font-size:14px}
+  .t-files{margin-top:7px;font-size:12.5px;color:var(--muted);font-family:"Consolas",monospace}
+  .t-files .fl{background:#221a17;border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-right:5px;display:inline-block;color:#c2b3a2}
+
+  details.done-box{margin-top:34px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 16px}
+  details.done-box summary{cursor:pointer;padding:12px 0;font-size:16px;color:#cdbfa9;font-weight:600;list-style:none}
+  details.done-box summary::-webkit-details-marker{display:none}
+  details.done-box summary::before{content:"▸ ";color:var(--accent2)}
+  details.done-box[open] summary::before{content:"▾ "}
+  .done-list{margin:4px 0 14px;padding-left:4px}
+  .done-list li{list-style:none;padding:5px 0;color:#bdb1a1;border-bottom:1px solid #2a201d}
+  .done-list li::before{content:"✓";color:var(--green);font-weight:700;margin-right:9px}
+  .done-list li b{color:#e3d8c6}
+
+  footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:30px}
+  footer code{background:#221a17;padding:1px 6px;border-radius:5px;color:#c2b3a2}
+  .empty{display:none;text-align:center;color:var(--muted);padding:24px;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>⚔️ Dark Souls <span class="blood">·</span> raylib Port</h1>
+    <div class="sub">Next-action board &nbsp;•&nbsp; updated <b>2026-06-07</b> &nbsp;•&nbsp; tick a box to mark a task picked / done (saved in your browser)</div>
+  </header>
+
+  <div class="bar">
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="fill"></div></div>
+      <div class="progress-label" id="plabel">0 / 0 done</div>
+    </div>
+    <div class="counts">
+      <span class="pill">🔴 High: <b id="c-high">0</b></span>
+      <span class="pill">🟠 Medium: <b id="c-med">0</b></span>
+      <span class="pill">⚪ Low: <b id="c-low">0</b></span>
+      <span class="pill">Open: <b id="c-open">0</b></span>
+    </div>
+  </div>
+
+  <div class="filters">
+    <span class="flabel">Show:</span>
+    <button class="fbtn active" data-filter="all">All</button>
+    <button class="fbtn" data-filter="high">🔴 High</button>
+    <button class="fbtn" data-filter="med">🟠 Medium</button>
+    <button class="fbtn" data-filter="low">⚪ Low</button>
+    <button class="fbtn" data-filter="open">Open only</button>
+    <button class="fbtn ghost" id="reset">↺ Reset checks</button>
+  </div>
+
+  <div id="board"><!-- tasks injected here --></div>
+  <div class="empty" id="empty">Nothing matches this filter. 🎉</div>
+
+  <details class="done-box">
+    <summary>✅ Already done this session (for context)</summary>
+    <ul class="done-list">
+      <li><b>Blood moon fixed</b> — was a black disc; now a glowing moon. Skips the glb's own dark Moon sphere that was occluding it.</li>
+      <li><b>Night sky dome</b> — gradient + moon-glow halo, drawn in both the main and reflection passes.</li>
+      <li><b>Water reflection rebuilt</b> — removed the dark voids, then fixed a horizontal-flip bug (reflection slid the wrong way when panning).</li>
+      <li><b>Moon glade</b> — shimmering moonlight path across the water toward the camera.</li>
+      <li><b>Player &amp; boss reflect</b> in the water.</li>
+      <li><b>Crystals reworked</b> — static cloudy-red gem boxes (varied sizes).</li>
+      <li><b>Crystal glow lights the water</b> — red pools around each cluster.</li>
+      <li><b>Sword trail</b> — subtle pure-white "wind" wisp at the blade, born &amp; gone fast.</li>
+      <li><b>Impact wave</b> — shockwave ring on every connecting hit.</li>
+      <li><b>Boss telegraph reworked</b> — small blink light: <b style="color:#e07a2a">orange = parryable</b>, <b style="color:#ff3b2e">red = unblockable</b>.</li>
+    </ul>
+  </details>
+
+  <footer>
+    Open this file in any browser. Tip: <code>build.bat</code> compiles &nbsp;·&nbsp;
+    <code>build\dark_souls_raylib.exe</code> plays &nbsp;·&nbsp;
+    <code>...exe scenic</code> previews the water/moon &nbsp;·&nbsp;
+    <code>...exe auto</code> runs a hands-free demo.
+  </footer>
+
+</div>
+
+<script>
+// ---- task data: edit/extend here ----
+const TASKS = [
+  { cat:"verify", id:"c1", prio:"high", eff:"~10 min", title:"Verify the RED (unblockable) telegraph in phase 2",
+    desc:"The orange parryable telegraph is confirmed. Confirm the red blink shows for the boss's heavy \"neck\" attack in phase 2 (boss < 50% HP) during real play, and that it genuinely can't be parried (must dodge).",
+    files:["src/boss.cpp"] },
+  { cat:"verify", id:"c2", prio:"high", eff:"~15 min", title:"Full-loop playtest after all the VFX changes",
+    desc:"Play one complete fight: parry → press E riposte, dodge an unblockable, trigger the phase-2 enrage, and reach both the YOU DIED and VICTORY screens. Make sure nothing regressed.",
+    files:["build\\dark_souls_raylib.exe"] },
+  { cat:"verify", id:"c3", prio:"med", eff:"~5 min", title:"Resize / resolution test",
+    desc:"The reflection render-texture resizes with the window. Resize the window and check the water reflection stays aligned and the screen-space sampling still looks right.",
+    files:["src/main.cpp"] },
+
+  { cat:"house", id:"e1", prio:"high", eff:"~10 min", title:"Put the project under version control (git)",
+    desc:"This folder is NOT a git repo yet — all of this session's work is un-versioned. Run git init, add a .gitignore for build/ and screenshot *.png, and make a first commit so nothing is lost.",
+    files:["(new) .gitignore"] },
+  { cat:"house", id:"e2", prio:"low", eff:"~15 min", title:"Refresh README screenshots",
+    desc:"Capture the new look (blood moon, reflective water + glade, red gem crystals, sword trail / telegraph) and update the README so it matches the current game.",
+    files:["README.md"] },
+  { cat:"house", id:"e3", prio:"low", eff:"~5 min", title:"Confirm build/ & screenshots are ignored",
+    desc:"Make sure build/ and stray demo_*/scenic/shot PNGs are git-ignored. The dev CLI modes (diag / scenic / auto) are intentional tools and can stay.",
+    files:[".gitignore"] },
+
+  { cat:"polish", id:"b1", prio:"med", eff:"~20 min", title:"Audio cue for the unblockable (red) telegraph",
+    desc:"Give the red/heavy attack a distinct warning sound so players get an audio tell, not just the colour — important for readability in fast fights.",
+    files:["src/boss.cpp","src/audio_sys.cpp"] },
+  { cat:"polish", id:"b2", prio:"low", eff:"~10 min", title:"Scale the impact wave with hit strength",
+    desc:"Make the shockwave ring bigger/brighter on heavy attacks and ripostes, smaller on light hits, so impact reads proportionally.",
+    files:["src/fx.cpp","src/juice.cpp"] },
+  { cat:"polish", id:"b3", prio:"med", eff:"~15 min", title:"Confirm telegraph light readability at play distance",
+    desc:"The blink light is small. Verify it's clearly visible from the normal third-person camera; consider a faint weapon/claw glow in the same colour as a backup tell.",
+    files:["src/boss.cpp"] },
+  { cat:"polish", id:"b4", prio:"low", eff:"~5 min", title:"Optional: pure-white sword trail over the moon",
+    desc:"The trail is additive white, so where it crosses the very bright blood-moon it blends slightly pink. If you want it pure white everywhere, switch it to an alpha-blended white.",
+    files:["src/player.cpp"] },
+
+  { cat:"issue", id:"a1", prio:"med", eff:"~1-2 hrs", title:"Crystals light the water but not the rocks/fighters",
+    desc:"The red glow only pools on the water surface. The lit shader has a single directional (moon) light and no point lights, so nearby monoliths and the fighters' legs aren't lit by the crystals. Adding point-light support would make the red glow spill onto geometry too.",
+    files:["assets/shaders/lit.fs","src/render.cpp","src/arena.cpp"] },
+  { cat:"issue", id:"a2", prio:"low", eff:"~10 min", title:"FX particles aren't reflected in the water",
+    desc:"Blood, sparks and parry flashes don't show in the reflection — only world geometry + the characters are drawn in the reflection pass. Add g_fx.draw(mcam) there if you want them mirrored too.",
+    files:["src/main.cpp"] },
+  { cat:"issue", id:"a3", prio:"low", eff:"~1 hr", title:"Point-blank self-occlusion of water reflections",
+    desc:"Because the planar reflection samples at each fragment's own screen position, a character standing directly over its reflection can hide it (most visible when clinched in the centre). A true oblique near-clip plane at the water level would fix it; it's a known limitation, fine for now.",
+    files:["src/main.cpp","assets/shaders/water.fs"] },
+
+  { cat:"feature", id:"d1", prio:"low", eff:"big", title:"Point-light system in the lit shader",
+    desc:"Generalise the lighting to support a small array of point lights (positions + colours). Unlocks crystal glow on geometry (A1) and could let the moon cast a soft fill. Bigger refactor of lit.fs + render.cpp.",
+    files:["assets/shaders/lit.fs","src/render.cpp"] },
+  { cat:"feature", id:"d2", prio:"low", eff:"medium", title:"More boss attack variety",
+    desc:"Add another phase-2 attack or a combo string for more fight texture (the FSM + telegraph + combo plumbing already supports it).",
+    files:["src/boss.cpp"] },
+];
+
+const CATS = [
+  { key:"verify",  emoji:"✅", name:"Verify &amp; Playtest" },
+  { key:"house",   emoji:"🧹", name:"Housekeeping" },
+  { key:"polish",  emoji:"✨", name:"Polish &amp; Juice" },
+  { key:"issue",   emoji:"🐞", name:"Known Issues / Limitations" },
+  { key:"feature", emoji:"🚀", name:"Bigger Features (optional)" },
+];
+
+const PRIO_LABEL = { high:"High", med:"Medium", low:"Low" };
+const PRIO_BADGE = { high:"b-high", med:"b-med", low:"b-low" };
+const LS = "ds_todo_v1";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(LS) || "{}"); } catch(e){ state = {}; }
+
+const board = document.getElementById("board");
+
+function render(){
+  board.innerHTML = "";
+  CATS.forEach(cat=>{
+    const items = TASKS.filter(t=>t.cat===cat.key);
+    if(!items.length) return;
+    const sec = document.createElement("section");
+    sec.dataset.cat = cat.key;
+    const openCount = items.filter(t=>!state[t.id]).length;
+    sec.innerHTML = `<div class="cat"><span class="emoji">${cat.emoji}</span><span>${cat.name}</span><span class="ct">${openCount} open / ${items.length}</span></div>`;
+    items.forEach(t=>{
+      const done = !!state[t.id];
+      const el = document.createElement("div");
+      el.className = "task" + (done?" done":"");
+      el.dataset.prio = t.prio;
+      el.dataset.id = t.id;
+      el.dataset.done = done ? "1":"0";
+      const files = (t.files||[]).map(f=>`<span class="fl">${f}</span>`).join("");
+      el.innerHTML = `
+        <input type="checkbox" class="cbox" ${done?"checked":""} aria-label="done">
+        <div class="t-body">
+          <div class="t-head">
+            <span class="t-title">${t.title}</span>
+            <span class="badge ${PRIO_BADGE[t.prio]}">${PRIO_LABEL[t.prio]}</span>
+            <span class="badge b-eff">⏱ ${t.eff}</span>
+          </div>
+          <p class="t-desc">${t.desc}</p>
+          ${files?`<div class="t-files">${files}</div>`:""}
+        </div>`;
+      el.querySelector(".cbox").addEventListener("change", e=>{
+        state[t.id] = e.target.checked;
+        localStorage.setItem(LS, JSON.stringify(state));
+        render(); updateBar();
+      });
+      sec.appendChild(el);
+    });
+    board.appendChild(sec);
+  });
+  applyFilter(curFilter);
+  updateBar();
+}
+
+function updateBar(){
+  const total = TASKS.length;
+  const done = TASKS.filter(t=>state[t.id]).length;
+  document.getElementById("fill").style.width = total? (done/total*100)+"%" : "0";
+  document.getElementById("plabel").textContent = `${done} / ${total} done`;
+  const open = TASKS.filter(t=>!state[t.id]);
+  document.getElementById("c-high").textContent = open.filter(t=>t.prio==="high").length;
+  document.getElementById("c-med").textContent  = open.filter(t=>t.prio==="med").length;
+  document.getElementById("c-low").textContent  = open.filter(t=>t.prio==="low").length;
+  document.getElementById("c-open").textContent = open.length;
+}
+
+let curFilter = "all";
+function applyFilter(f){
+  curFilter = f;
+  let anyVisible = false;
+  document.querySelectorAll(".task").forEach(el=>{
+    let show = true;
+    if(f==="open") show = el.dataset.done==="0";
+    else if(f!=="all") show = el.dataset.prio===f;
+    el.style.display = show ? "" : "none";
+    if(show) anyVisible = true;
+  });
+  // hide empty category sections
+  document.querySelectorAll("section").forEach(sec=>{
+    const vis = [...sec.querySelectorAll(".task")].some(el=>el.style.display!=="none");
+    sec.style.display = vis ? "" : "none";
+  });
+  document.getElementById("empty").style.display = anyVisible ? "none" : "block";
+}
+
+document.querySelectorAll(".fbtn[data-filter]").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll(".fbtn[data-filter]").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    applyFilter(b.dataset.filter);
+  });
+});
+document.getElementById("reset").addEventListener("click", ()=>{
+  if(confirm("Clear all ticks?")){ state={}; localStorage.removeItem(LS); render(); }
+});
+
+render();
+</script>
+</body>
+</html>
