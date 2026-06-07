@@ -120,8 +120,9 @@ void load(Shader lit) {
     Mesh disc = GenMeshPlane(48.0f, 48.0f, 1, 1);
     s_moon = LoadModelFromMesh(disc);
     s_moon.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = assets::texture("textures/moon/blood_moon.png");
+    const char* moon_fs = (g_level == LEVEL_FROZEN) ? "shaders/moon_crescent.fs" : "shaders/moon.fs";
     s_moon_shader = LoadShader(assets::path("shaders/moon.vs").c_str(),
-                               assets::path("shaders/moon.fs").c_str());
+                               assets::path(moon_fs).c_str());
     s_moon.materials[0].shader = s_moon_shader;
     s_has_moon = true;
 
@@ -189,8 +190,8 @@ void draw_sky(Camera3D cam) {
 
 void draw_world(Camera3D cam) {
     (void)cam;
-    // blood-moon disc — the frozen cathedral is moonless, so skip it there
-    if (s_has_moon && g_level != LEVEL_FROZEN)
+    // sky moon: a full blood moon in the ruin, a cold crescent in the frozen cathedral
+    if (s_has_moon)
         DrawModelEx(s_moon, MOON_POS, Vector3{ 1, 0, 0 }, 90.0f, Vector3{ 1, 1, 1 }, WHITE);
     if (s_has_model)
         for (int i = 0; i < s_model.meshCount; i++)
