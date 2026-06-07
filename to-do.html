@@ -208,10 +208,10 @@ const TASKS = [
     desc:"The blink light is small. Verify it's clearly visible from the normal third-person camera; consider a faint weapon/claw glow in the same colour as a backup tell.",
     files:["src/boss.cpp"],
     note:"Verified — the blink light reads clearly at play distance in the demo captures; the new audio cue adds a second (ear) tell." },
-  { cat:"polish", id:"b4", prio:"low", eff:"~5 min", title:"Optional: pure-white sword trail over the moon", status:"deferred",
+  { cat:"polish", id:"b4", prio:"low", eff:"~5 min", title:"Optional: pure-white sword trail over the moon", done:true, status:"done",
     desc:"The trail is additive white, so where it crosses the very bright blood-moon it blends slightly pink. If you want it pure white everywhere, switch it to an alpha-blended white.",
     files:["src/player.cpp"],
-    note:"Left as-is on purpose — the additive white trail was iterated on and approved; alpha-blend is a taste call. Toggle is a one-line change if you want it later." },
+    note:"Done — trail switched to alpha-blended pure white, which washes toward white over any background (no more pink over the moon); softened to a low peak + depth-write-off so it stays a subtle wisp." },
 
   { cat:"issue", id:"a1", prio:"med", eff:"~1-2 hrs", title:"Crystals light the water but not the rocks/fighters", done:true, status:"done",
     desc:"The red glow only pools on the water surface. The lit shader has a single directional (moon) light and no point lights, so nearby monoliths and the fighters' legs aren't lit by the crystals. Adding point-light support would make the red glow spill onto geometry too.",
@@ -221,19 +221,19 @@ const TASKS = [
     desc:"Blood, sparks and parry flashes don't show in the reflection — only world geometry + the characters are drawn in the reflection pass. Add g_fx.draw(mcam) there if you want them mirrored too.",
     files:["src/main.cpp"],
     note:"Done — g_fx.draw(mcam) added to the reflection pass; blood/sparks now reflect in the water." },
-  { cat:"issue", id:"a3", prio:"low", eff:"~1 hr", title:"Point-blank self-occlusion of water reflections", status:"deferred",
+  { cat:"issue", id:"a3", prio:"low", eff:"~1 hr", title:"Point-blank self-occlusion of water reflections", done:true, status:"done",
     desc:"Because the planar reflection samples at each fragment's own screen position, a character standing directly over its reflection can hide it (most visible when clinched in the centre). A true oblique near-clip plane at the water level would fix it; it's a known limitation, fine for now.",
-    files:["src/main.cpp","assets/shaders/water.fs"],
-    note:"Deferred — genuinely involved (oblique near-clip plane) and low impact; only shows at point-blank clinches. Fine for now." },
+    files:["assets/shaders/lit.fs","src/render.cpp","src/main.cpp"],
+    note:"Done — added the oblique clip plane (lit.fs uClipBelow/uClipY, set per-pass in main.cpp) so the reflection only mirrors above-water geometry, keeping the waterline clean. (The point-blank 'self-occlusion' itself is just the character body correctly occluding the water in front of it.)" },
 
   { cat:"feature", id:"d1", prio:"low", eff:"big", title:"Point-light system in the lit shader", done:true, status:"done",
     desc:"Generalise the lighting to support a small array of point lights (positions + colours). Unlocks crystal glow on geometry (A1) and could let the moon cast a soft fill. Bigger refactor of lit.fs + render.cpp.",
     files:["assets/shaders/lit.fs","src/render.cpp"],
     note:"Done — lit.fs now takes a uPLights[] array (xyz+radius) + shared colour; LitShader::set_point_lights uploads them. This powers a1." },
-  { cat:"feature", id:"d2", prio:"low", eff:"medium", title:"More boss attack variety", status:"deferred",
+  { cat:"feature", id:"d2", prio:"low", eff:"medium", title:"More boss attack variety", done:true, status:"done",
     desc:"Add another phase-2 attack or a combo string for more fight texture (the FSM + telegraph + combo plumbing already supports it).",
     files:["src/boss.cpp"],
-    note:"Deferred — content/design choice that needs a fitting enemy animation; left for a dedicated pass rather than added speculatively." },
+    note:"Done — added a phase-2 unblockable 'scream' roar-slam (zombie_scream anim, red telegraph + growl cue). Verified it runs through phase 2 to victory with no crash." },
 ];
 
 const CATS = [

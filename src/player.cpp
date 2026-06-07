@@ -518,29 +518,30 @@ void Player::update_sword_trail(float dt) {
 void Player::draw_sword_trail() {
     if (sword_trail_.size() < 2) return;
     rlDisableBackfaceCulling();
-    // Additive only ever ADDS white light (never darkens), and the solid-white
-    // default texture guarantees no stray texel tints it -> pure white tone + clear.
+    rlDisableDepthMask();                  // translucent: depth-test but don't write (no self-sort)
+    // Alpha-blended pure white: washes toward white over ANY background, so it stays
+    // white even crossing the bright blood-moon (additive there went pink). Solid-white
+    // default texture guarantees no stray texel; alpha only ever lightens, never black.
     rlSetTexture(rlGetTextureIdDefault());
-    BeginBlendMode(BLEND_ADDITIVE);
+    BeginBlendMode(BLEND_ALPHA);
     rlBegin(RL_QUADS);
-    // Bright white right at the blade, fading fast to clear along the tail: alpha is
-    // driven by age with a steep (cubic) falloff; the colour stays pure white, only
-    // the alpha changes (white where visible, fully transparent where faded).
+    // bright white at the blade, fading fast (cubic) to clear along the short tail
     for (size_t i = 1; i < sword_trail_.size(); i++) {
         const SwordTrailSeg& a = sword_trail_[i - 1];
         const SwordTrailSeg& b = sword_trail_[i];
         float fa = 1.0f - a.age / trail_life_;  fa = fa * fa * fa;   // 1 near blade -> 0 far
         float fb = 1.0f - b.age / trail_life_;  fb = fb * fb * fb;
-        unsigned char ta = (unsigned char)(120.0f * fa);
-        unsigned char tb = (unsigned char)(120.0f * fb);
-        rlColor4ub(255, 255, 255, (unsigned char)(ta * 0.45f)); rlVertex3f(a.base.x, a.base.y, a.base.z);
+        unsigned char ta = (unsigned char)(90.0f * fa);
+        unsigned char tb = (unsigned char)(90.0f * fb);
+        rlColor4ub(255, 255, 255, (unsigned char)(ta * 0.40f)); rlVertex3f(a.base.x, a.base.y, a.base.z);
         rlColor4ub(255, 255, 255, ta);                          rlVertex3f(a.tip.x, a.tip.y, a.tip.z);
         rlColor4ub(255, 255, 255, tb);                          rlVertex3f(b.tip.x, b.tip.y, b.tip.z);
-        rlColor4ub(255, 255, 255, (unsigned char)(tb * 0.45f)); rlVertex3f(b.base.x, b.base.y, b.base.z);
+        rlColor4ub(255, 255, 255, (unsigned char)(tb * 0.40f)); rlVertex3f(b.base.x, b.base.y, b.base.z);
     }
     rlEnd();
     EndBlendMode();
     rlSetTexture(0);
+    rlEnableDepthMask();
     rlEnableBackfaceCulling();
 }
 

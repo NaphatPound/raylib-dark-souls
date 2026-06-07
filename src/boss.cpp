@@ -19,10 +19,11 @@ static const BossAttack* find_attack(const std::vector<std::pair<std::string, Bo
 void Boss::init(Vector3 spawn) {
     pos = spawn;
     attacks = {
-        { "swipe", { "zombie_attack",    1.7f, 0.55f, 0.85f, 18.0f, 25.0f, 3.2f, false } },
-        { "bite",  { "zombie_biting",    1.9f, 0.60f, 0.95f, 26.0f, 30.0f, 2.8f, false } },
-        { "neck",  { "zombie_neck_bite", 2.1f, 0.70f, 1.10f, 32.0f, 38.0f, 2.6f, true  } },
-        { "bite2", { "zombie_biting_2",  1.6f, 0.55f, 0.90f, 24.0f, 28.0f, 3.0f, false } },
+        { "swipe",  { "zombie_attack",    1.7f, 0.55f, 0.85f, 18.0f, 25.0f, 3.2f, false } },
+        { "bite",   { "zombie_biting",    1.9f, 0.60f, 0.95f, 26.0f, 30.0f, 2.8f, false } },
+        { "neck",   { "zombie_neck_bite", 2.1f, 0.70f, 1.10f, 32.0f, 38.0f, 2.6f, true  } },
+        { "bite2",  { "zombie_biting_2",  1.6f, 0.55f, 0.90f, 24.0f, 28.0f, 3.0f, false } },
+        { "scream", { "zombie_scream",    2.0f, 0.80f, 1.15f, 30.0f, 42.0f, 3.6f, true  } },  // phase-2 unblockable roar-slam
     };
 
     model = LoadModel(assets::path("characters/enemy.glb").c_str());
@@ -130,7 +131,7 @@ void Boss::choose_attack() {
 std::string Boss::pick_attack_key() {
     std::vector<std::string> pool = (phase == 1)
         ? std::vector<std::string>{ "swipe", "bite" }
-        : std::vector<std::string>{ "swipe", "bite", "neck", "bite2" };
+        : std::vector<std::string>{ "swipe", "bite", "neck", "bite2", "scream" };
     int idx = (int)fabsf(state_time * 1000.0f) % (int)pool.size();
     return pool[idx];
 }

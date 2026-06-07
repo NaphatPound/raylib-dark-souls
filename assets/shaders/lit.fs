@@ -20,9 +20,16 @@ uniform int  uPLightN;
 uniform vec4 uPLights[MAX_PLIGHTS];   // xyz = world pos, w = radius (red crystal lights)
 uniform vec3 uPLightColor;            // shared crystal light colour
 
+uniform int   uClipBelow;             // 1 in the reflection pass: clip geometry under the water
+uniform float uClipY;                 // water level
+
 out vec4 finalColor;
 
 void main() {
+    // oblique clip plane: in the reflection pass, drop anything below the water surface
+    // so only above-water geometry is mirrored (a standard planar-reflection step).
+    if (uClipBelow == 1 && fragWorld.y < uClipY) discard;
+
     vec4 tex = texture(texture0, fragTexCoord);
     vec3 albedo = tex.rgb * colDiffuse.rgb * fragColor.rgb;
     vec3 N = normalize(fragNormal);

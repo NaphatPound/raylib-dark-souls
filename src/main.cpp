@@ -105,6 +105,7 @@ int main(int argc, char** argv) {
             BeginTextureMode(rfx);
                 ClearBackground(Color{ 13, 6, 13, 255 });
                 g_lit.set_frame(mc.position);
+                g_lit.set_clip(arena::water_level, true);
                 BeginMode3D(mc);
                     arena::draw_sky(mc);
                     rlDisableBackfaceCulling();
@@ -112,6 +113,7 @@ int main(int argc, char** argv) {
                     rlEnableBackfaceCulling();
                 EndMode3D();
             EndTextureMode();
+            g_lit.set_clip(0.0f, false);
             Vector2 scr{ (float)GetScreenWidth(), (float)GetScreenHeight() };
             BeginDrawing();
             ClearBackground(Color{ 13, 6, 13, 255 });
@@ -227,6 +229,7 @@ int main(int argc, char** argv) {
         BeginTextureMode(reflect);
             ClearBackground(Color{ 13, 6, 13, 255 });
             g_lit.set_frame(mcam.position);
+            g_lit.set_clip(arena::water_level, true);   // only above-water geometry reflects
             BeginMode3D(mcam);
                 arena::draw_sky(mcam);
                 rlDisableBackfaceCulling();   // mirror flips winding -> draw reflected geo unculled
@@ -237,6 +240,7 @@ int main(int argc, char** argv) {
                 rlEnableBackfaceCulling();
             EndMode3D();
         EndTextureMode();
+        g_lit.set_clip(0.0f, false);          // main pass: no clip
 
         Vector2 screen{ (float)GetScreenWidth(), (float)GetScreenHeight() };
         BeginDrawing();

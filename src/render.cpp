@@ -21,6 +21,8 @@ void LitShader::load() {
     loc_plightN    = GetShaderLocation(shader, "uPLightN");
     loc_plights    = GetShaderLocation(shader, "uPLights");
     loc_plightColor= GetShaderLocation(shader, "uPLightColor");
+    loc_clipY      = GetShaderLocation(shader, "uClipY");
+    loc_clipBelow  = GetShaderLocation(shader, "uClipBelow");
 
     Vector3 lightDir = Vector3Normalize({ 0.12f, 0.82f, -0.58f });  // toward the moon
     Vector3 lightCol = { 1.45f, 0.92f, 0.84f };                      // rose moonlight
@@ -34,6 +36,7 @@ void LitShader::load() {
     SetShaderValue(shader, loc_fogColor, &fogCol, SHADER_UNIFORM_VEC3);
     SetShaderValue(shader, loc_fogDensity, &fogDen, SHADER_UNIFORM_FLOAT);
     SetShaderValue(shader, loc_emissive, &emissive, SHADER_UNIFORM_FLOAT);
+    set_clip(0.0f, false);   // reflection clip off by default (main pass)
 }
 
 void LitShader::unload() { if (ok) UnloadShader(shader); }
@@ -55,6 +58,13 @@ void LitShader::set_point_lights(const Vector4* lights, int count, Vector3 color
     SetShaderValue(shader, loc_plightColor, &color, SHADER_UNIFORM_VEC3);
     if (count > 0)
         SetShaderValueV(shader, loc_plights, lights, SHADER_UNIFORM_VEC4, count);
+}
+
+void LitShader::set_clip(float water_y, bool below) {
+    if (!ok) return;
+    int b = below ? 1 : 0;
+    SetShaderValue(shader, loc_clipBelow, &b, SHADER_UNIFORM_INT);
+    SetShaderValue(shader, loc_clipY, &water_y, SHADER_UNIFORM_FLOAT);
 }
 
 void LitShader::apply_to_model(Model& m) {

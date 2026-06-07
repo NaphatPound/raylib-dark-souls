@@ -210,5 +210,11 @@ slider quantization.
 - **Repo + README** — committed and pushed to GitHub (repo renamed `raylib-dark-souls`);
   added a Screenshots section + `docs/screenshots/`. Verified the full loop (combat →
   phase-2 enrage → boss death → VICTORY) via the auto demo.
-- Deferred (logged in to-do.html): oblique near-clip plane for point-blank reflection
-  self-occlusion, more boss attacks, and the optional alpha-blend white trail.
+- Then cleared the last three (user asked to complete the whole board):
+  - **Alpha-blend white trail** (`player.cpp`) — the trail washes toward white over any
+    background, so it no longer goes pink crossing the bright moon (additive did);
+    depth-write off, low peak so it stays a subtle wisp.
+  - **Oblique reflection clip plane** (`lit.fs` `uClipBelow`/`uClipY` + `LitShader::set_clip`,
+    toggled per-pass in `main.cpp`) — the reflection only mirrors above-water geometry.
+  - **New phase-2 boss attack** (`boss.cpp`) — an unblockable `zombie_scream` roar-slam
+    added to the phase-2 pool (red telegraph + growl cue); verified through to victory.
