@@ -493,6 +493,30 @@ int main(int argc, char** argv) {
             g_fx.draw(player.camera);
             if (bonfire_lit) draw_bonfire(BONFIRE_POS, (float)GetTime());
             if (intro != INTRO_NONE) draw_bonfire(INTRO_BONFIRE, (float)GetTime());
+            // --- combat markers: drawn LAST (on top of water/FX) so their depth-test toggle
+            //     can't disturb the water blending over the sword/reflection ---
+            // deathblow marker: a pulsing red dot (white core) on a posture-broken boss.
+            if (!mob_level && boss.executable()) {
+                Vector3 dp = boss.pos + Vector3{ 0, 1.3f, 0 };
+                float pulse = 0.5f + 0.5f * sinf((float)GetTime() * 7.0f);
+                rlDisableDepthTest();
+                BeginBlendMode(BLEND_ADDITIVE);
+                DrawSphere(dp, 0.22f + 0.13f * pulse, Color{ 255, 55, 40, (unsigned char)(170 * pulse) });
+                EndBlendMode();
+                DrawSphere(dp, 0.16f, Color{ 225, 0, 0, 255 });
+                DrawSphere(dp, 0.075f, Color{ 255, 248, 240, 255 });
+                rlEnableDepthTest();
+            }
+            // lock-on marker: a small white dot on the locked target's body (not a center reticle).
+            if (Actor* lt = player.lock_on_target()) {
+                Vector3 lp = lt->position() + Vector3{ 0, 1.1f, 0 };
+                rlDisableDepthTest();
+                BeginBlendMode(BLEND_ADDITIVE);
+                DrawSphere(lp, 0.045f, Color{ 190, 210, 255, 90 });
+                EndBlendMode();
+                DrawSphere(lp, 0.025f, Color{ 255, 255, 255, 240 });
+                rlEnableDepthTest();
+            }
         EndMode3D();
 
         if (intro == INTRO_NONE) { hud.draw(); screens.draw(); }

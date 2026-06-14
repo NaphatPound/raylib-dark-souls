@@ -17,7 +17,10 @@ struct BossAttack {
 
 class Boss : public Actor {
 public:
-    enum S { SLEEP, ROAR, IDLE, CHASE, ATTACK, STAGGER, PHASE, DEAD };
+    enum S { SLEEP, ROAR, IDLE, CHASE, ATTACK, STAGGER, PHASE, DEAD,
+             REACT,    // parry flinch (small) or posture-break lurch (big, played to ~50%)
+             KNEEL,    // posture broken: kneeling, deathblow-ready (red dot)
+             EXECUTE }; // being deathblown: falling-back death
 
     void init(Vector3 spawn);
     void unload();
@@ -31,6 +34,7 @@ public:
     void on_hurt(const Hit& hit) override;
     void parried() override;
     void take_riposte(float dmg) override;
+    bool executable() const override { return state == KNEEL; }
 
     Hurtbox hurtbox;
     Hitbox  hitbox;
@@ -54,6 +58,12 @@ private:
     void end_hit();
     void enter_stagger();
     void process_stagger(float dt);
+    void add_posture(float amount);          // Sekiro posture; full -> posture break
+    void enter_react(bool big);              // small flinch / big posture-break lurch
+    void process_react(float dt);
+    void enter_kneel();                      // posture broken: kneel, deathblow-ready
+    void process_kneel(float dt);
+    void process_execute(float dt);          // falling-back deathblow death
     void enter_phase2();
     void process_phase(float dt);
     void process_dead();
@@ -77,6 +87,15 @@ private:
     bool on_floor = true;
     float state_time = 0.0f;
     float poise = 70.0f;
+    // Sekiro-style posture: parries fill it; full -> posture break -> kneel/deathblow.
+    float max_posture = 100.0f, posture = 0.0f;
+    float posture_gain = 34.0f;     // per parry (~3 parries to break)
+    float posture_regen = 9.0f;     // decays after a short delay
+    float posture_idle = 0.0f;      // time since last parry, gates the decay
+    bool  react_big = false;        // current REACT is a posture-break lurch (-> kneel)
+    float react_dur = 0.8f;         // current react clip length
+    float react_cd = 0.0f;          // rate-limits hit flinches so they can't perma-lock the boss
+    bool  execute_lethal = false;   // EXECUTE: stay down (dead) vs get knocked down then recover
     float visual_yaw = 0.0f;
     Vector3 aim_dir{ 0, 0, 1 };
     BossAttack attack_def{};

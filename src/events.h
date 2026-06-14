@@ -15,6 +15,9 @@ struct Events {
     Signal<float>        camera_shake;             // (amount)
     Signal<Actor*>       riposte_available;        // parry landed -> show takedown prompt
     Signal<>             riposte_ended;            // window closed / consumed
+    Signal<float, float> boss_posture_changed;     // (current, max) Sekiro-style posture bar
+    Signal<Actor*>       boss_executable;          // posture broke -> boss kneeling, show red dot
+    Signal<>             boss_executable_ended;     // deathblow consumed / boss recovered
 };
 
 extern Events g_events;

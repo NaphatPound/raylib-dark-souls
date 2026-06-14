@@ -33,11 +33,13 @@ void Boss::init(Vector3 spawn) {
     hitbox.owner = this;  hitbox.radius = 1.1f; hitbox.fwd = 1.4f; hitbox.up = 1.0f;
 
     poise = max_poise;
+    posture = 0.0f;
     health.changed.connect([](float c, float m) { g_events.boss_health_changed.emit(c, m); });
     health.died.connect([this]() { on_died(); });
     health.init(max_health);
     g_game.boss = this;
     g_events.boss_phase_changed.emit(phase);
+    g_events.boss_posture_changed.emit(posture, max_posture);
     g_events.boss_aggro.connect([this]() { on_aggro(); });
 
     // face the player on spawn (player is at +Z, boss at -Z)
@@ -58,12 +60,21 @@ Actor* Boss::player() { return (g_game.player && !g_game.player->is_dead()) ? g_
 void Boss::update(float dt, const std::vector<Hurtbox*>& targets) {
     state_time += dt;
     if (cooldown > 0.0f) cooldown -= dt;
+    if (react_cd > 0.0f) react_cd -= dt;
     if (!on_floor) velocity.y -= gravity * dt;
     else velocity.y = fmaxf(velocity.y, -0.1f);
     if (poise < max_poise && state != STAGGER && state != DEAD)
         poise = fminf(max_poise, poise + poise_regen * dt);
     if (state != ATTACK && tele_energy > 0.0f)
         tele_energy = move_toward(tele_energy, 0.0f, 10.0f * dt);
+    // posture slowly recovers a short while after the last parry (Sekiro-style),
+    // but never while broken (kneeling) or mid-react.
+    posture_idle += dt;
+    if (posture > 0.0f && posture_idle > 1.2f &&
+        state != KNEEL && state != EXECUTE && state != REACT) {
+        posture = fmaxf(0.0f, posture - posture_regen * dt);
+        g_events.boss_posture_changed.emit(posture, max_posture);
+    }
 
     switch (state) {
         case SLEEP: process_sleep(dt); break;
@@ -73,6 +84,9 @@ void Boss::update(float dt, const std::vector<Hurtbox*>& targets) {
         case STAGGER: process_stagger(dt); break;
         case PHASE:   process_phase(dt); break;
         case DEAD:    process_dead(); break;
+        case REACT:   process_react(dt); break;
+        case KNEEL:   process_kneel(dt); break;
+        case EXECUTE: process_execute(dt); break;
     }
     move_and_collide(dt);
     if (on_floor) g_fx.track_movement(this, pos, Vector2Length({ velocity.x, velocity.z }), dt);
@@ -195,13 +209,18 @@ void Boss::end_hit() {
 
 // ---------------------------------------------------------------- damage/poise
 void Boss::on_hurt(const Hit& hit) {
-    if (state == DEAD) return;
+    if (state == DEAD || state == EXECUTE || state == KNEEL) return;  // kneeling -> deathblow only
     health.take_damage(hit.damage);
     if (health.is_dead()) return;
     if (phase == 1 && health.fraction() <= phase2_threshold) { enter_phase2(); return; }
     if (state != STAGGER) {
         poise -= hit.poise_damage;
-        if (poise <= 0.0f) { poise = max_poise; enter_stagger(); }
+        if (poise <= 0.0f) {
+            poise = max_poise; enter_stagger();
+        } else if ((state == IDLE || state == CHASE) && react_cd <= 0.0f) {
+            react_cd = 1.4f;        // small flinch on a normal hit (rate-limited; no flinch mid-attack)
+            enter_react(false);
+        }
     }
 }
 void Boss::enter_stagger() {
@@ -221,27 +240,98 @@ void Boss::process_stagger(float dt) {
     }
 }
 void Boss::parried() {
-    if (state == DEAD) return;
+    if (state == DEAD || state == KNEEL || state == EXECUTE) return;
     end_hit();
     combo_left = 0;
     poise = max_poise;
     tele_energy = 0.0f;
     hurtbox.invulnerable = false;
-    parry_stun = true;
-    set_state(STAGGER);
-    anim.set_anim("zombie_idle");
-    anim.set_speed_scale(0.2f);
+    add_posture(posture_gain);   // fills the posture bar; full -> break -> kneel
 }
-void Boss::take_riposte(float dmg) {
-    if (state == DEAD) return;
-    health.take_damage(dmg);
-    g_events.hit_landed.emit(this, dmg);
-    if (health.is_dead()) return;
-    if (phase == 1 && health.fraction() <= phase2_threshold) { enter_phase2(); return; }
-    parry_stun = false;
+
+// Add posture; a full bar breaks the boss (big lurch -> kneel). Otherwise a small flinch.
+void Boss::add_posture(float amount) {
+    posture = fminf(max_posture, posture + amount);
+    posture_idle = 0.0f;
+    g_events.boss_posture_changed.emit(posture, max_posture);
+    enter_react(posture >= max_posture);
+}
+
+void Boss::enter_react(bool big) {
+    react_big = big;
+    set_state(REACT);
     anim.set_speed_scale(1.0f);
-    cooldown = attack_cooldown;
-    set_state(CHASE);
+    const char* clip = big ? "react_large_front" : "react_small_right";
+    react_dur = big ? 1.0f : 0.77f;     // natural clip lengths from the export
+    anim.play_fitted(clip, react_dur);
+}
+
+void Boss::process_react(float dt) {
+    velocity.x = move_toward(velocity.x, 0.0f, 18.0f * dt);
+    velocity.z = move_toward(velocity.z, 0.0f, 18.0f * dt);
+    if (react_big) {
+        // play the large react only to ~halfway, then drop into the kneel
+        if (state_time >= react_dur * 0.5f) enter_kneel();
+    } else if (state_time >= react_dur) {
+        set_state(CHASE);
+        cooldown = attack_cooldown;
+    }
+}
+
+void Boss::enter_kneel() {
+    end_hit();
+    combo_left = 0;
+    velocity = { 0, 0, 0 };
+    set_state(KNEEL);
+    anim.set_anim("zombie_idle");         // old slow stun pose (not kneeling)
+    anim.set_speed_scale(0.22f);
+    g_events.boss_executable.emit(this);  // -> red dot on body, deathblow-ready
+}
+
+void Boss::process_kneel(float dt) {
+    velocity.x = move_toward(velocity.x, 0.0f, 20.0f * dt);
+    velocity.z = move_toward(velocity.z, 0.0f, 20.0f * dt);
+    // stays kneeling until the player lands the deathblow (E)
+}
+
+// Deathblow: the player's stab finished. Deals a big chunk (not a guaranteed kill);
+// only when it would drop HP to 0 does the boss fall back and die.
+void Boss::take_riposte(float dmg) {
+    if (state == DEAD || state == EXECUTE) return;
+    end_hit();
+    combo_left = 0;
+    velocity = { 0, 0, 0 };
+    posture = 0.0f;
+    posture_idle = 0.0f;
+    g_events.boss_posture_changed.emit(posture, max_posture);
+    g_events.boss_executable_ended.emit();
+    g_events.hit_landed.emit(this, dmg);
+    anim.set_speed_scale(1.0f);
+    // either way the stab knocks the boss down with the falling-back animation
+    execute_lethal = (health.current - dmg <= 0.0f);
+    hurtbox.invulnerable = true;
+    set_state(EXECUTE);
+    anim.play_fitted("falling_back_death", 1.4f);   // snappy: falls right at the stab
+    if (execute_lethal) {
+        // mark dead directly so on_died()'s zombie_dying doesn't override the fall, then win
+        health.current = 0.0f; health.dead = true;
+        g_events.boss_health_changed.emit(0.0f, health.max_health);
+        g_game.on_boss_died();
+    } else {
+        health.take_damage(dmg);   // big chunk; survives and will get back up
+    }
+}
+
+void Boss::process_execute(float dt) {
+    velocity.x = 0; velocity.z = 0;
+    // lethal: hold the fallen pose. survived: get back up once the fall finishes.
+    if (!execute_lethal && (anim.finished() || state_time > 1.8f)) {
+        hurtbox.invulnerable = false;
+        anim.set_speed_scale(1.0f);
+        cooldown = attack_cooldown;
+        if (phase == 1 && health.fraction() <= phase2_threshold) { enter_phase2(); return; }
+        set_state(CHASE);
+    }
 }
 
 // ---------------------------------------------------------------- phase 2
@@ -331,6 +421,10 @@ void Boss::draw() {
 void Boss::reset_state() {
     phase = 1;
     poise = max_poise;
+    posture = 0.0f;
+    posture_idle = 0.0f;
+    execute_lethal = false;
+    react_cd = 0.0f;
     health.heal_full();
     hurtbox.invulnerable = false;
     anim.set_speed_scale(1.0f);
@@ -342,4 +436,6 @@ void Boss::reset_state() {
     set_state(SLEEP);
     anim.set_anim("zombie_idle");
     g_events.boss_phase_changed.emit(phase);
+    g_events.boss_executable_ended.emit();
+    g_events.boss_posture_changed.emit(posture, max_posture);
 }

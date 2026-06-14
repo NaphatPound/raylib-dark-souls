@@ -174,10 +174,18 @@ void Player::try_dodge() {
     if (state == DODGE || state == HIT || state == DEAD) return;
     if (!stamina.spend(dodge_cost)) return;
     Vector3 dir = wish_dir();
-    if (Vector3Length(dir) < 0.1f) dir = facing_forward() * -1.0f;
+    if (Vector3Length(dir) < 0.1f) dir = facing_forward() * -1.0f;   // no input -> dodge back
     move_dir = Vector3Normalize(dir);
+    // choose the directional dodge clip from the dodge dir relative to the player's facing
+    Vector3 fwd = facing_forward();
+    Vector3 rightv{ -fwd.z, 0.0f, fwd.x };
+    float fdot = Vector3DotProduct(move_dir, fwd);
+    float rdot = Vector3DotProduct(move_dir, rightv);
+    const char* clip = (fabsf(fdot) >= fabsf(rdot))
+        ? (fdot >= 0.0f ? "dodge_forward" : "dodge_backward")
+        : (rdot >= 0.0f ? "dodge_right" : "dodge_left");
     set_state(DODGE);
-    anim.play_fitted("standing_jump", dodge_duration);
+    anim.play_fitted(clip, dodge_duration);
     g_audio.play("dodge", 0.06f);
     g_fx.dodge(pos);
     end_attack_hit();
@@ -301,13 +309,10 @@ void Player::process_heal(float dt) {
 // ---------------------------------------------------------------- parry / riposte
 void Player::do_parry(Actor* source) {
     parry_timer = 0.0f;
-    if (source) source->parried();
+    if (source) source->parried();   // fills the boss posture bar; a full bar -> kneel (executable)
     g_audio.play("block", 0.05f, 2.0f, 1.5f);
     g_events.camera_shake.emit(0.7f);
     g_fx.parry(pos + Vector3{ 0, 1.2f, 0 });
-    riposte_target = source;
-    riposte_timer = riposte_window;
-    if (riposte_target) g_events.riposte_available.emit(riposte_target);
     set_state(IDLE);
     anim.set_anim("standing_idle");
 }
@@ -325,42 +330,62 @@ void Player::update_riposte_window(float dt) {
 }
 
 void Player::try_riposte() {
-    if (riposte_timer <= 0.0f || riposte_target == nullptr) return;
     if (state == DODGE || state == DEAD || state == ATTACK || state == RIPOSTE) return;
-    if (Vector3Distance(pos, riposte_target->position()) > riposte_range) return;
-    do_riposte();
+    // deathblow only on a posture-broken (kneeling) boss
+    Actor* target = (g_game.boss && g_game.boss->executable()) ? g_game.boss : nullptr;
+    if (!target) return;
+    if (Vector3Distance(pos, target->position()) > riposte_range) return;
+    do_riposte(target);
 }
 
-void Player::do_riposte() {
-    Actor* target = riposte_target;
+void Player::do_riposte(Actor* target) {
     riposte_pending = target;
     riposte_done = false;
-    riposte_target = nullptr;
-    riposte_timer = 0.0f;
-    g_events.riposte_ended.emit();
+    g_events.boss_executable_ended.emit();   // consume the red dot immediately
     Vector3 dir = target->position() - pos;
     dir.y = 0;
     if (Vector3Length(dir) > 0.01f) {
         dir = Vector3Normalize(dir);
         face_instant(dir);
         aim_dir = dir;
+        // close the gap: stand right in front of the enemy so the stab actually connects
+        Vector3 tp = target->position(); tp.y = pos.y;
+        pos = tp - dir * 0.95f;
+        arena::resolve(pos, BODY_RADIUS);
     }
     set_state(RIPOSTE);
-    anim.play_fitted("standing_melee_attack_downward", riposte_duration);
-    g_audio.play("swing", 0.05f, 0.0f, 0.85f);
+    anim.play_fitted("stabbing", riposte_duration);   // full stab
+    g_audio.play("swing", 0.05f, 0.0f, 0.9f);
+    // blood + lunge cue the moment the deathblow begins
+    g_fx.hit(target->position() + Vector3{ 0, 1.0f, 0 }, 1.2f);
+    g_audio.play("hit", 0.10f, 0.0f, 0.85f);
+    g_events.camera_shake.emit(0.4f);
 }
 
 void Player::process_riposte(float dt) {
     velocity.x = move_toward(velocity.x, 0.0f, 22.0f * dt);
     velocity.z = move_toward(velocity.z, 0.0f, 22.0f * dt);
+    // light blood from the wind-up before the blade lands
+    if (!riposte_done && riposte_pending && fmodf(state_time, 0.22f) < dt)
+        g_fx.hit(riposte_pending->position() + Vector3{ 0, 1.05f, 0 }, 0.8f);
+    // the deathblow fires the instant the blade drives into the body (mid-thrust),
+    // so the enemy falls immediately on contact rather than at the end of the stab.
     if (!riposte_done && state_time >= riposte_duration * riposte_apply_at) {
         riposte_done = true;
-        if (riposte_pending) {   // boss take_riposte() no-ops if already dead (matches player.gd)
-            g_fx.riposte(riposte_pending->position() + Vector3{ 0, 1.1f, 0 });
-            riposte_pending->take_riposte(riposte_damage);
+        if (riposte_pending) {
+            Vector3 c = riposte_pending->position() + Vector3{ 0, 1.1f, 0 };
+            g_fx.riposte(c);                       // takedown burst
+            g_fx.hit(c, 2.4f);                     // heavy blood spray
+            g_fx.impact_wave(riposte_pending->position() + Vector3{ 0, 0.5f, 0 }, 1.4f);
+            g_events.camera_shake.emit(1.2f);
+            g_audio.play("hit", 0.05f, 3.0f, 0.78f);   // deep, loud impact
+            riposte_pending->take_riposte(riposte_damage);   // -> boss falls back now
         }
     }
-    if (state_time >= riposte_duration) {
+    // return to the normal camera at ~80% of the enemy's falling-death (don't wait for its end)
+    const float contact = riposte_duration * riposte_apply_at;
+    const float fall_dur = 1.4f;   // matches the boss falling_back_death fit
+    if (riposte_done && state_time >= contact + fall_dur * 0.8f) {
         riposte_pending = nullptr;
         set_state(IDLE);
     }
@@ -446,7 +471,8 @@ void Player::face_instant(Vector3 dir) {
 }
 
 void Player::update_visual_facing(float dt) {
-    if (state == ATTACK || state == HIT || state == DEAD) return;
+    // hold facing during a dodge so the directional (fwd/back/left/right) clip reads correctly
+    if (state == ATTACK || state == HIT || state == DEAD || state == DODGE) return;
     Vector3 face_dir{ 0, 0, 0 };
     if (locked && lock_target && !lock_target->is_dead()) face_dir = lock_target->position() - pos;
     else if (Vector3Length(move_dir) > 0.1f) face_dir = move_dir;
@@ -458,6 +484,21 @@ void Player::update_visual_facing(float dt) {
 }
 
 void Player::update_camera(float dt) {
+    // cinematic takedown: pan to a low front 3/4 shot so we watch the stab from the front,
+    // then the normal rig lerps back once the riposte ends (state -> IDLE).
+    if (state == RIPOSTE && riposte_pending) {
+        Vector3 e = riposte_pending->position();
+        Vector3 fwd = flat(e - pos);
+        if (Vector3Length(fwd) < 0.01f) fwd = aim_dir;
+        fwd = Vector3Normalize(fwd);
+        Vector3 right{ fwd.z, 0.0f, -fwd.x };
+        Vector3 mid = Vector3Lerp(pos, e, 0.5f) + Vector3{ 0, 1.1f, 0 };
+        Vector3 cpos = e + fwd * 2.0f + right * 1.5f + Vector3{ 0, 0.9f, 0 };  // beyond+beside the enemy
+        float k = Clamp(cam_lerp * 0.5f * dt, 0.0f, 1.0f);
+        camera.position = Vector3Lerp(camera.position, cpos, k);
+        camera.target   = Vector3Lerp(camera.target, mid, k);
+        return;
+    }
     Vector3 pivot = pos + Vector3{ 0, cam_height, 0 };
     if (locked && lock_target && !lock_target->is_dead()) {
         Vector3 d = flat(lock_target->position() - pos);

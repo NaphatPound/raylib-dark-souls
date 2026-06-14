@@ -12,10 +12,9 @@ void HUD::init() {
     g_events.boss_aggro.connect([this]() { boss_visible = true; });
     g_events.lock_on_changed.connect([this](Actor* a) { reticle = (a != nullptr); });
     g_events.player_flask_changed.connect([this](int c, int m) { flask = c; flask_max = m; });
-    g_events.riposte_available.connect([this](Actor*) { prompt = true; });
-    g_events.riposte_ended.connect([this]() { prompt = false; });
+    g_events.boss_posture_changed.connect([this](float c, float m) { boss_posture = m > 0 ? c / m : 0; });
     g_game.state_changed.connect([this](int s) {
-        if (s == Game::TITLE) { boss_visible = false; reticle = false; prompt = false; }
+        if (s == Game::TITLE) { boss_visible = false; reticle = false; boss_posture = 0.0f; }
     });
 }
 
@@ -158,15 +157,13 @@ void HUD::draw() {
         DrawText(name, sw / 2 - tw / 2, by - 26, 20, Color{ 217, 204, 178, 255 });
         Color fill = boss_phase >= 2 ? Color{ 204, 64, 20, 255 } : Color{ 140, 26, 31, 255 };
         bar(bx, by, bw, 16, boss_hp, fill);
+        // posture bar directly under the HP bar; glows hot as it nears a break
+        int pw = bw - 120, px = sw / 2 - pw / 2, py = by + 22;
+        bool full = boss_posture >= 0.999f;
+        unsigned char pulse = (unsigned char)(200 + 55 * sinf(t * 10.0f));
+        Color pfill = full ? Color{ 255, 226, 120, pulse }
+                           : Color{ (unsigned char)(210 + 45 * boss_posture), 170, 60, 255 };
+        bar(px, py, pw, 8, boss_posture, pfill);
     }
-    // lock-on reticle
-    if (reticle) DrawRectangle(sw / 2 - 5, sh / 2 - 5, 10, 10, Color{ 255, 255, 255, 217 });
-    // takedown prompt
-    if (prompt) {
-        unsigned char a = (unsigned char)(255 * (0.6f + 0.4f * sinf(t * 9.0f)));
-        const char* txt = "[ E ]  TAKEDOWN";
-        int fw = MeasureText(txt, 30);
-        DrawText(txt, sw / 2 - fw / 2 + 2, sh / 2 - 108 + 2, 30, Color{ 0, 0, 0, a });
-        DrawText(txt, sw / 2 - fw / 2, sh / 2 - 110, 30, Color{ 255, 219, 82, a });
-    }
+    // lock-on marker is drawn in 3D on the target's body (see main.cpp), not a center reticle
 }

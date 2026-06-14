@@ -43,6 +43,8 @@ public:
     void anim_tick(float dt) { anim.update(dt); }                          // advance only
     void set_facing(float yaw) { visual_yaw = target_yaw = yaw; }
     float facing() const { return visual_yaw; }
+    // the currently locked-on target (nullptr if not locked / target dead) — for the lock-on marker
+    Actor* lock_on_target() const { return (locked && lock_target && !lock_target->is_dead()) ? lock_target : nullptr; }
 
     Camera3D camera{};
     Hurtbox hurtbox;
@@ -76,7 +78,7 @@ private:
     void do_parry(Actor* source);
     void update_riposte_window(float dt);
     void try_riposte();
-    void do_riposte();
+    void do_riposte(Actor* target);
     void process_riposte(float dt);
     void stagger();
     void process_hit(float dt);
@@ -102,8 +104,8 @@ private:
     float block_soak = 0.6f, facing_offset = 0.0f;
     int   flask_max = 4;
     float flask_heal = 45.0f, flask_duration = 1.1f, flask_apply_at = 0.55f;
-    float parry_window = 0.28f, riposte_window = 2.2f, riposte_range = 3.0f;
-    float riposte_damage = 80.0f, riposte_duration = 0.95f, riposte_apply_at = 0.4f;
+    float parry_window = 0.28f, riposte_window = 2.2f, riposte_range = 3.2f;
+    float riposte_damage = 200.0f, riposte_duration = 1.5f, riposte_apply_at = 0.45f;  // big chunk; fall fires at blade contact (0.45 of stab)
     float cam_distance = 2.0f, cam_height = 1.5f, cam_follow_speed = 2.5f, cam_lerp = 16.0f;
 
     std::vector<AttackDef> light_combo;

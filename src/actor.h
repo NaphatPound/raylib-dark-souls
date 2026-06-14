@@ -12,4 +12,5 @@ struct Actor {
     virtual void on_hurt(const Hit& h) {}     // a hurtbox passed us a hit -> resolve it
     virtual void parried() {}                  // boss only: the player parried our swing
     virtual void take_riposte(float dmg) {}    // boss only: the player's takedown finisher
+    virtual bool executable() const { return false; } // boss only: posture broken, deathblow-ready
 };
