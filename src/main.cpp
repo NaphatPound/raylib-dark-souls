@@ -16,6 +16,7 @@
 #include "assets.h"
 #include "player.h"
 #include "boss.h"
+#include "mobs.h"
 #include "hud.h"
 #include "screens.h"
 #include "pause_menu.h"
@@ -33,9 +34,123 @@ int main(int argc, char** argv) {
         if (TextIsEqual(argv[i], "auto")) auto_demo = true;
         if (TextIsEqual(argv[i], "diag")) diag = true;
         if (TextIsEqual(argv[i], "scenic")) scenic = true;
+        if (TextIsEqual(argv[i], "bloodmoon") || TextIsEqual(argv[i], "ruin") || TextIsEqual(argv[i], "moon")) { g_level = LEVEL_BLOODMOON; level_arg = true; }
         if (TextIsEqual(argv[i], "ice") || TextIsEqual(argv[i], "frozen")) { g_level = LEVEL_FROZEN; level_arg = true; }
         if (TextIsEqual(argv[i], "forge") || TextIsEqual(argv[i], "lava")) { g_level = LEVEL_FORGE; level_arg = true; }
         if (TextIsEqual(argv[i], "colosseum") || TextIsEqual(argv[i], "pit")) { g_level = LEVEL_COLOSSEUM; level_arg = true; }
+        if (TextIsEqual(argv[i], "grave") || TextIsEqual(argv[i], "graveyard")) { g_level = LEVEL_GRAVEYARD; level_arg = true; }
+        if (TextIsEqual(argv[i], "fungal") || TextIsEqual(argv[i], "grotto")) { g_level = LEVEL_FUNGAL; level_arg = true; }
+        if (TextIsEqual(argv[i], "desert") || TextIsEqual(argv[i], "ziggurat")) { g_level = LEVEL_DESERT; level_arg = true; }
+        if (TextIsEqual(argv[i], "cove") || TextIsEqual(argv[i], "wreck") || TextIsEqual(argv[i], "shipwreck")) { g_level = LEVEL_WRECK; level_arg = true; }
+        if (TextIsEqual(argv[i], "sky") || TextIsEqual(argv[i], "sanctum")) { g_level = LEVEL_SANCTUM; level_arg = true; }
+        if (TextIsEqual(argv[i], "clock") || TextIsEqual(argv[i], "vault") || TextIsEqual(argv[i], "clockwork")) { g_level = LEVEL_CLOCK; level_arg = true; }
+        if (TextIsEqual(argv[i], "shrine") || TextIsEqual(argv[i], "torii")) { g_level = LEVEL_SHRINE; level_arg = true; }
+        if (TextIsEqual(argv[i], "bones") || TextIsEqual(argv[i], "boneyard") || TextIsEqual(argv[i], "dragon")) { g_level = LEVEL_BONES; level_arg = true; }
+        if (TextIsEqual(argv[i], "crystal") || TextIsEqual(argv[i], "cavern") || TextIsEqual(argv[i], "geode")) { g_level = LEVEL_GEODE; level_arg = true; }
+        if (TextIsEqual(argv[i], "temple") || TextIsEqual(argv[i], "jungle") || TextIsEqual(argv[i], "overgrown")) { g_level = LEVEL_TEMPLE; level_arg = true; }
+        if (TextIsEqual(argv[i], "mine") || TextIsEqual(argv[i], "mineshaft") || TextIsEqual(argv[i], "dig")) { g_level = LEVEL_MINE; level_arg = true; }
+        if (TextIsEqual(argv[i], "observatory") || TextIsEqual(argv[i], "orrery") || TextIsEqual(argv[i], "astral")) { g_level = LEVEL_OBS; level_arg = true; }
+        if (TextIsEqual(argv[i], "library") || TextIsEqual(argv[i], "archive") || TextIsEqual(argv[i], "lib")) { g_level = LEVEL_LIB; level_arg = true; }
+        if (TextIsEqual(argv[i], "camp") || TextIsEqual(argv[i], "siege") || TextIsEqual(argv[i], "warcamp")) { g_level = LEVEL_CAMP; level_arg = true; }
+        if (TextIsEqual(argv[i], "aqueduct") || TextIsEqual(argv[i], "viaduct") || TextIsEqual(argv[i], "cistern")) { g_level = LEVEL_AQUA; level_arg = true; }
+        if (TextIsEqual(argv[i], "court") || TextIsEqual(argv[i], "sentinels") || TextIsEqual(argv[i], "statues")) { g_level = LEVEL_COURT; level_arg = true; }
+        if (TextIsEqual(argv[i], "garden") || TextIsEqual(argv[i], "gardens") || TextIsEqual(argv[i], "bloom")) { g_level = LEVEL_GARDEN; level_arg = true; }
+        if (TextIsEqual(argv[i], "bridge") || TextIsEqual(argv[i], "chasm") || TextIsEqual(argv[i], "span")) { g_level = LEVEL_BRIDGE; level_arg = true; }
+        if (TextIsEqual(argv[i], "beacon") || TextIsEqual(argv[i], "lighthouse") || TextIsEqual(argv[i], "coast")) { g_level = LEVEL_BEACON; level_arg = true; }
+        if (TextIsEqual(argv[i], "mill") || TextIsEqual(argv[i], "windmill") || TextIsEqual(argv[i], "fields")) { g_level = LEVEL_MILL; level_arg = true; }
+        if (TextIsEqual(argv[i], "ossuary") || TextIsEqual(argv[i], "catacombs") || TextIsEqual(argv[i], "crypt")) { g_level = LEVEL_OSSUARY; level_arg = true; }
+        if (TextIsEqual(argv[i], "fair") || TextIsEqual(argv[i], "fairground") || TextIsEqual(argv[i], "carnival")) { g_level = LEVEL_FAIR; level_arg = true; }
+        if (TextIsEqual(argv[i], "throne") || TextIsEqual(argv[i], "hall") || TextIsEqual(argv[i], "kings")) { g_level = LEVEL_THRONE; level_arg = true; }
+        if (TextIsEqual(argv[i], "springs") || TextIsEqual(argv[i], "geyser") || TextIsEqual(argv[i], "hotsprings")) { g_level = LEVEL_SPRINGS; level_arg = true; }
+        if (TextIsEqual(argv[i], "petrified") || TextIsEqual(argv[i], "stoneforest") || TextIsEqual(argv[i], "woods")) { g_level = LEVEL_PFOREST; level_arg = true; }
+        if (TextIsEqual(argv[i], "hamlet") || TextIsEqual(argv[i], "village") || TextIsEqual(argv[i], "plague")) { g_level = LEVEL_HAMLET; level_arg = true; }
+        if (TextIsEqual(argv[i], "henge") || TextIsEqual(argv[i], "stonehenge") || TextIsEqual(argv[i], "circle")) { g_level = LEVEL_HENGE; level_arg = true; }
+        if (TextIsEqual(argv[i], "bog") || TextIsEqual(argv[i], "swamp") || TextIsEqual(argv[i], "marsh")) { g_level = LEVEL_BOG; level_arg = true; }
+        if (TextIsEqual(argv[i], "sawmill") || TextIsEqual(argv[i], "lumber") || TextIsEqual(argv[i], "timberyard")) { g_level = LEVEL_SAWMILL; level_arg = true; }
+        if (TextIsEqual(argv[i], "gaol") || TextIsEqual(argv[i], "prison") || TextIsEqual(argv[i], "dungeon")) { g_level = LEVEL_GAOL; level_arg = true; }
+        if (TextIsEqual(argv[i], "tar") || TextIsEqual(argv[i], "tarpit") || TextIsEqual(argv[i], "pitch")) { g_level = LEVEL_TAR; level_arg = true; }
+        if (TextIsEqual(argv[i], "vineyard") || TextIsEqual(argv[i], "vine") || TextIsEqual(argv[i], "winery")) { g_level = LEVEL_VINE; level_arg = true; }
+        if (TextIsEqual(argv[i], "floes") || TextIsEqual(argv[i], "glacier") || TextIsEqual(argv[i], "harbor")) { g_level = LEVEL_FLOE; level_arg = true; }
+        if (TextIsEqual(argv[i], "quarry") || TextIsEqual(argv[i], "excavation") || TextIsEqual(argv[i], "stonepit")) { g_level = LEVEL_QUARRY; level_arg = true; }
+        if (TextIsEqual(argv[i], "skydock") || TextIsEqual(argv[i], "airship") || TextIsEqual(argv[i], "dirigible")) { g_level = LEVEL_DOCK; level_arg = true; }
+        if (TextIsEqual(argv[i], "conservatory") || TextIsEqual(argv[i], "glasshouse") || TextIsEqual(argv[i], "greenhouse")) { g_level = LEVEL_GLASS; level_arg = true; }
+        if (TextIsEqual(argv[i], "apiary") || TextIsEqual(argv[i], "bees") || TextIsEqual(argv[i], "beeyard")) { g_level = LEVEL_APIARY; level_arg = true; }
+        if (TextIsEqual(argv[i], "kiln") || TextIsEqual(argv[i], "pottery") || TextIsEqual(argv[i], "kilnyard")) { g_level = LEVEL_KILN; level_arg = true; }
+        if (TextIsEqual(argv[i], "reef") || TextIsEqual(argv[i], "coral") || TextIsEqual(argv[i], "seabed")) { g_level = LEVEL_REEF; level_arg = true; }
+        if (TextIsEqual(argv[i], "foundry") || TextIsEqual(argv[i], "ironworks") || TextIsEqual(argv[i], "smithy")) { g_level = LEVEL_FOUNDRY; level_arg = true; }
+        if (TextIsEqual(argv[i], "nave") || TextIsEqual(argv[i], "cathedral") || TextIsEqual(argv[i], "basilica")) { g_level = LEVEL_NAVE; level_arg = true; }
+        if (TextIsEqual(argv[i], "watermill") || TextIsEqual(argv[i], "millpond") || TextIsEqual(argv[i], "waterwheel")) { g_level = LEVEL_WATERMILL; level_arg = true; }
+        if (TextIsEqual(argv[i], "salt") || TextIsEqual(argv[i], "saltpan") || TextIsEqual(argv[i], "saltflats")) { g_level = LEVEL_SALT; level_arg = true; }
+        if (TextIsEqual(argv[i], "stilt") || TextIsEqual(argv[i], "fishingvillage") || TextIsEqual(argv[i], "lagoon")) { g_level = LEVEL_STILT; level_arg = true; }
+        if (TextIsEqual(argv[i], "hive") || TextIsEqual(argv[i], "honeycomb") || TextIsEqual(argv[i], "nest")) { g_level = LEVEL_HIVE; level_arg = true; }
+        if (TextIsEqual(argv[i], "brewery") || TextIsEqual(argv[i], "distillery") || TextIsEqual(argv[i], "vats")) { g_level = LEVEL_BREW; level_arg = true; }
+        if (TextIsEqual(argv[i], "bamboo") || TextIsEqual(argv[i], "grove") || TextIsEqual(argv[i], "thicket")) { g_level = LEVEL_BAMBOO; level_arg = true; }
+        if (TextIsEqual(argv[i], "collier") || TextIsEqual(argv[i], "charcoal") || TextIsEqual(argv[i], "meiler")) { g_level = LEVEL_COLLIER; level_arg = true; }
+        if (TextIsEqual(argv[i], "plaza") || TextIsEqual(argv[i], "square") || TextIsEqual(argv[i], "fountainsquare")) { g_level = LEVEL_PLAZA; level_arg = true; }
+        if (TextIsEqual(argv[i], "pumpkin") || TextIsEqual(argv[i], "patch") || TextIsEqual(argv[i], "hallow")) { g_level = LEVEL_PUMPKIN; level_arg = true; }
+        if (TextIsEqual(argv[i], "bell") || TextIsEqual(argv[i], "belfry") || TextIsEqual(argv[i], "carillon")) { g_level = LEVEL_BELL; level_arg = true; }
+        if (TextIsEqual(argv[i], "aviary") || TextIsEqual(argv[i], "birdcage") || TextIsEqual(argv[i], "rookery")) { g_level = LEVEL_AVIARY; level_arg = true; }
+        if (TextIsEqual(argv[i], "web") || TextIsEqual(argv[i], "lair") || TextIsEqual(argv[i], "spider")) { g_level = LEVEL_WEB; level_arg = true; }
+        if (TextIsEqual(argv[i], "lotus") || TextIsEqual(argv[i], "pond") || TextIsEqual(argv[i], "pavilion")) { g_level = LEVEL_LOTUS; level_arg = true; }
+        if (TextIsEqual(argv[i], "archtree") || TextIsEqual(argv[i], "greattree") || TextIsEqual(argv[i], "worldtree")) { g_level = LEVEL_ARCHTREE; level_arg = true; }
+        if (TextIsEqual(argv[i], "chess") || TextIsEqual(argv[i], "gambit") || TextIsEqual(argv[i], "checkmate")) { g_level = LEVEL_CHESS; level_arg = true; }
+        if (TextIsEqual(argv[i], "maze") || TextIsEqual(argv[i], "hedge") || TextIsEqual(argv[i], "labyrinth")) { g_level = LEVEL_MAZE; level_arg = true; }
+        if (TextIsEqual(argv[i], "falls") || TextIsEqual(argv[i], "waterfall") || TextIsEqual(argv[i], "cascade")) { g_level = LEVEL_FALLS; level_arg = true; }
+        if (TextIsEqual(argv[i], "crater") || TextIsEqual(argv[i], "meteor") || TextIsEqual(argv[i], "star")) { g_level = LEVEL_CRATER; level_arg = true; }
+        if (TextIsEqual(argv[i], "titan") || TextIsEqual(argv[i], "colossus") || TextIsEqual(argv[i], "giant")) { g_level = LEVEL_TITAN; level_arg = true; }
+        if (TextIsEqual(argv[i], "hoodoos") || TextIsEqual(argv[i], "canyon") || TextIsEqual(argv[i], "badlands")) { g_level = LEVEL_HOODOO; level_arg = true; }
+        if (TextIsEqual(argv[i], "moai") || TextIsEqual(argv[i], "heads") || TextIsEqual(argv[i], "island")) { g_level = LEVEL_MOAI; level_arg = true; }
+        if (TextIsEqual(argv[i], "cavern") || TextIsEqual(argv[i], "dripstone") || TextIsEqual(argv[i], "limestone")) { g_level = LEVEL_CAVERN; level_arg = true; }
+        if (TextIsEqual(argv[i], "pines") || TextIsEqual(argv[i], "snowforest") || TextIsEqual(argv[i], "winter")) { g_level = LEVEL_PINES; level_arg = true; }
+        if (TextIsEqual(argv[i], "galleon") || TextIsEqual(argv[i], "ship") || TextIsEqual(argv[i], "deck")) { g_level = LEVEL_GALLEON; level_arg = true; }
+        if (TextIsEqual(argv[i], "sunflower") || TextIsEqual(argv[i], "sunflowers") || TextIsEqual(argv[i], "sunfield")) { g_level = LEVEL_SUNFLOWER; level_arg = true; }
+        if (TextIsEqual(argv[i], "sphinx") || TextIsEqual(argv[i], "pyramids") || TextIsEqual(argv[i], "giza")) { g_level = LEVEL_SPHINX; level_arg = true; }
+        if (TextIsEqual(argv[i], "dam") || TextIsEqual(argv[i], "reservoir") || TextIsEqual(argv[i], "spillway")) { g_level = LEVEL_DAM; level_arg = true; }
+        if (TextIsEqual(argv[i], "theatre") || TextIsEqual(argv[i], "amphitheatre") || TextIsEqual(argv[i], "stage")) { g_level = LEVEL_THEATRE; level_arg = true; }
+        if (TextIsEqual(argv[i], "wheel") || TextIsEqual(argv[i], "ferris") || TextIsEqual(argv[i], "fairwheel")) { g_level = LEVEL_WHEEL; level_arg = true; }
+        if (TextIsEqual(argv[i], "redwood") || TextIsEqual(argv[i], "redwoods") || TextIsEqual(argv[i], "sequoia")) { g_level = LEVEL_REDWOOD; level_arg = true; }
+        if (TextIsEqual(argv[i], "balloon") || TextIsEqual(argv[i], "balloons") || TextIsEqual(argv[i], "festival")) { g_level = LEVEL_BALLOON; level_arg = true; }
+        if (TextIsEqual(argv[i], "canal") || TextIsEqual(argv[i], "canals") || TextIsEqual(argv[i], "venice")) { g_level = LEVEL_CANAL; level_arg = true; }
+        if (TextIsEqual(argv[i], "silo") || TextIsEqual(argv[i], "silos") || TextIsEqual(argv[i], "grain")) { g_level = LEVEL_SILO; level_arg = true; }
+        if (TextIsEqual(argv[i], "organ") || TextIsEqual(argv[i], "pipes") || TextIsEqual(argv[i], "organhall")) { g_level = LEVEL_ORGAN; level_arg = true; }
+        if (TextIsEqual(argv[i], "hypostyle") || TextIsEqual(argv[i], "karnak") || TextIsEqual(argv[i], "pillars")) { g_level = LEVEL_HYPO; level_arg = true; }
+        if (TextIsEqual(argv[i], "fort") || TextIsEqual(argv[i], "bastion") || TextIsEqual(argv[i], "fortress")) { g_level = LEVEL_FORT; level_arg = true; }
+        if (TextIsEqual(argv[i], "triumph") || TextIsEqual(argv[i], "arch") || TextIsEqual(argv[i], "quadriga")) { g_level = LEVEL_TRIUMPH; level_arg = true; }
+        if (TextIsEqual(argv[i], "orchard") || TextIsEqual(argv[i], "blossom") || TextIsEqual(argv[i], "cherry")) { g_level = LEVEL_ORCHARD; level_arg = true; }
+        if (TextIsEqual(argv[i], "loom") || TextIsEqual(argv[i], "weaver") || TextIsEqual(argv[i], "tapestry")) { g_level = LEVEL_LOOM; level_arg = true; }
+        if (TextIsEqual(argv[i], "savanna") || TextIsEqual(argv[i], "acacia") || TextIsEqual(argv[i], "baobab")) { g_level = LEVEL_SAVANNA; level_arg = true; }
+        if (TextIsEqual(argv[i], "mosque") || TextIsEqual(argv[i], "minaret") || TextIsEqual(argv[i], "dome")) { g_level = LEVEL_MOSQUE; level_arg = true; }
+        if (TextIsEqual(argv[i], "totem") || TextIsEqual(argv[i], "totems") || TextIsEqual(argv[i], "longhouse")) { g_level = LEVEL_TOTEM; level_arg = true; }
+        if (TextIsEqual(argv[i], "oasis") || TextIsEqual(argv[i], "palms") || TextIsEqual(argv[i], "spring")) { g_level = LEVEL_OASIS; level_arg = true; }
+        if (TextIsEqual(argv[i], "pagoda") || TextIsEqual(argv[i], "torii") || TextIsEqual(argv[i], "zen")) { g_level = LEVEL_PAGODA; level_arg = true; }
+        if (TextIsEqual(argv[i], "stepwell") || TextIsEqual(argv[i], "baori") || TextIsEqual(argv[i], "baoli")) { g_level = LEVEL_STEPWELL; level_arg = true; }
+        if (TextIsEqual(argv[i], "jantar") || TextIsEqual(argv[i], "sundial") || TextIsEqual(argv[i], "yantra")) { g_level = LEVEL_JANTAR; level_arg = true; }
+        if (TextIsEqual(argv[i], "terracotta") || TextIsEqual(argv[i], "army") || TextIsEqual(argv[i], "warriors")) { g_level = LEVEL_TERRACOTTA; level_arg = true; }
+        if (TextIsEqual(argv[i], "ballcourt") || TextIsEqual(argv[i], "pelota") || TextIsEqual(argv[i], "maya")) { g_level = LEVEL_BALLCOURT; level_arg = true; }
+        if (TextIsEqual(argv[i], "petra") || TextIsEqual(argv[i], "treasury") || TextIsEqual(argv[i], "khazneh")) { g_level = LEVEL_PETRA; level_arg = true; }
+        if (TextIsEqual(argv[i], "bazaar") || TextIsEqual(argv[i], "souk") || TextIsEqual(argv[i], "market")) { g_level = LEVEL_BAZAAR; level_arg = true; }
+        if (TextIsEqual(argv[i], "siegeworks") || TextIsEqual(argv[i], "trebuchet") || TextIsEqual(argv[i], "engines")) { g_level = LEVEL_SIEGE; level_arg = true; }
+        if (TextIsEqual(argv[i], "whaling") || TextIsEqual(argv[i], "tryworks") || TextIsEqual(argv[i], "station")) { g_level = LEVEL_WHALING; level_arg = true; }
+        if (TextIsEqual(argv[i], "cactus") || TextIsEqual(argv[i], "saguaro") || TextIsEqual(argv[i], "sonoran")) { g_level = LEVEL_CACTUS; level_arg = true; }
+        if (TextIsEqual(argv[i], "zimbabwe") || TextIsEqual(argv[i], "enclosure") || TextIsEqual(argv[i], "conical")) { g_level = LEVEL_ZIMBABWE; level_arg = true; }
+        if (TextIsEqual(argv[i], "basil") || TextIsEqual(argv[i], "onion") || TextIsEqual(argv[i], "kremlin")) { g_level = LEVEL_BASIL; level_arg = true; }
+        if (TextIsEqual(argv[i], "printing") || TextIsEqual(argv[i], "press") || TextIsEqual(argv[i], "printworks")) { g_level = LEVEL_PRINT; level_arg = true; }
+        if (TextIsEqual(argv[i], "ger") || TextIsEqual(argv[i], "yurt") || TextIsEqual(argv[i], "steppe")) { g_level = LEVEL_GER; level_arg = true; }
+        if (TextIsEqual(argv[i], "alchemy") || TextIsEqual(argv[i], "alchemist") || TextIsEqual(argv[i], "athanor")) { g_level = LEVEL_ALCHEMY; level_arg = true; }
+        if (TextIsEqual(argv[i], "baths") || TextIsEqual(argv[i], "thermae") || TextIsEqual(argv[i], "bathhouse")) { g_level = LEVEL_BATHS; level_arg = true; }
+        if (TextIsEqual(argv[i], "floating") || TextIsEqual(argv[i], "river") || TextIsEqual(argv[i], "sampan")) { g_level = LEVEL_FLOAT; level_arg = true; }
+        if (TextIsEqual(argv[i], "ishtar") || TextIsEqual(argv[i], "gate") || TextIsEqual(argv[i], "babylon")) { g_level = LEVEL_ISHTAR; level_arg = true; }
+        if (TextIsEqual(argv[i], "tannery") || TextIsEqual(argv[i], "dye") || TextIsEqual(argv[i], "fez")) { g_level = LEVEL_TANNERY; level_arg = true; }
+        if (TextIsEqual(argv[i], "museum") || TextIsEqual(argv[i], "fossil") || TextIsEqual(argv[i], "natural")) { g_level = LEVEL_MUSEUM; level_arg = true; }
+        if (TextIsEqual(argv[i], "monastery") || TextIsEqual(argv[i], "gompa") || TextIsEqual(argv[i], "stupa")) { g_level = LEVEL_GOMPA; level_arg = true; }
+        if (TextIsEqual(argv[i], "buddha") || TextIsEqual(argv[i], "daibutsu") || TextIsEqual(argv[i], "grotto")) { g_level = LEVEL_BUDDHA; level_arg = true; }
+        if (TextIsEqual(argv[i], "angkor") || TextIsEqual(argv[i], "prasat") || TextIsEqual(argv[i], "templemount")) { g_level = LEVEL_ANGKOR; level_arg = true; }
+        if (TextIsEqual(argv[i], "badgir") || TextIsEqual(argv[i], "windcatcher") || TextIsEqual(argv[i], "yazd")) { g_level = LEVEL_BADGIR; level_arg = true; }
+        if (TextIsEqual(argv[i], "topiary") || TextIsEqual(argv[i], "parterre") || TextIsEqual(argv[i], "clipped")) { g_level = LEVEL_TOPIARY; level_arg = true; }
+        if (TextIsEqual(argv[i], "glassworks") || TextIsEqual(argv[i], "glassblower") || TextIsEqual(argv[i], "hotshop")) { g_level = LEVEL_GLASSWORKS; level_arg = true; }
+        if (TextIsEqual(argv[i], "shipyard") || TextIsEqual(argv[i], "slipway") || TextIsEqual(argv[i], "drydock")) { g_level = LEVEL_SHIPYARD; level_arg = true; }
+        if (TextIsEqual(argv[i], "gothic") || TextIsEqual(argv[i], "buttress") || TextIsEqual(argv[i], "rosewindow")) { g_level = LEVEL_GOTHIC; level_arg = true; }
+        if (TextIsEqual(argv[i], "pueblo") || TextIsEqual(argv[i], "cliffdwelling") || TextIsEqual(argv[i], "mesa")) { g_level = LEVEL_PUEBLO; level_arg = true; }
     }
 
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
@@ -163,30 +278,52 @@ int main(int argc, char** argv) {
 
     const Vector3 PLAYER_SPAWN{ 0, 0, 16 }, BOSS_SPAWN{ 0, 0, -10 }, BONFIRE_POS{ 0, 0, 7 };
 
+    bool mob_level = false;   // true on LEVEL_GRAVEYARD: a Hollow horde instead of the Boss
+
     g_game.restart_requested.connect([&]() {
         player.pos = PLAYER_SPAWN; player.reset_state();
-        boss.pos = BOSS_SPAWN;     boss.reset_state();
+        if (mob_level) mobs::reset();
+        else { boss.pos = BOSS_SPAWN; boss.reset_state(); }
     });
 
     RenderTexture2D reflect = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     std::vector<Hurtbox*> boss_targets, player_targets;
     bool level_loaded = false;
 
+    // ---- Blood-Moon bonfire intro: a cinematic "rise from rest" before the fight ----
+    enum IntroPhase { INTRO_NONE, INTRO_SIT, INTRO_STAND };
+    int   intro = INTRO_NONE;
+    float intro_t = 0.0f;
+    const Vector3 INTRO_BONFIRE{ 0.0f, 0.0f, 14.4f };   // ~1.6m in front of the player spawn
+    Vector3 stand_cam0{}, stand_tgt0{};                 // camera pose captured when the player rises
+
     auto load_level = [&](int lvl) {
         g_level = lvl;
+        mob_level = (lvl == LEVEL_GRAVEYARD || lvl == LEVEL_FUNGAL || lvl == LEVEL_DESERT || lvl == LEVEL_WRECK || lvl == LEVEL_SANCTUM || lvl == LEVEL_CLOCK || lvl == LEVEL_SHRINE || lvl == LEVEL_BONES || lvl == LEVEL_GEODE || lvl == LEVEL_TEMPLE || lvl == LEVEL_MINE || lvl == LEVEL_OBS || lvl == LEVEL_LIB || lvl == LEVEL_CAMP || lvl == LEVEL_AQUA || lvl == LEVEL_COURT || lvl == LEVEL_GARDEN || lvl == LEVEL_BRIDGE || lvl == LEVEL_BEACON || lvl == LEVEL_MILL || lvl == LEVEL_OSSUARY || lvl == LEVEL_FAIR || lvl == LEVEL_THRONE || lvl == LEVEL_SPRINGS || lvl == LEVEL_PFOREST || lvl == LEVEL_HAMLET || lvl == LEVEL_HENGE || lvl == LEVEL_BOG || lvl == LEVEL_SAWMILL || lvl == LEVEL_GAOL || lvl == LEVEL_TAR || lvl == LEVEL_VINE || lvl == LEVEL_FLOE || lvl == LEVEL_QUARRY || lvl == LEVEL_DOCK || lvl == LEVEL_GLASS || lvl == LEVEL_APIARY || lvl == LEVEL_KILN || lvl == LEVEL_REEF || lvl == LEVEL_FOUNDRY || lvl == LEVEL_NAVE || lvl == LEVEL_WATERMILL || lvl == LEVEL_SALT || lvl == LEVEL_STILT || lvl == LEVEL_HIVE || lvl == LEVEL_BREW || lvl == LEVEL_BAMBOO || lvl == LEVEL_COLLIER || lvl == LEVEL_PLAZA || lvl == LEVEL_PUMPKIN || lvl == LEVEL_BELL || lvl == LEVEL_AVIARY || lvl == LEVEL_WEB || lvl == LEVEL_LOTUS || lvl == LEVEL_ARCHTREE || lvl == LEVEL_CHESS || lvl == LEVEL_MAZE || lvl == LEVEL_FALLS || lvl == LEVEL_CRATER || lvl == LEVEL_TITAN || lvl == LEVEL_HOODOO || lvl == LEVEL_MOAI || lvl == LEVEL_CAVERN || lvl == LEVEL_PINES || lvl == LEVEL_GALLEON || lvl == LEVEL_SUNFLOWER || lvl == LEVEL_SPHINX || lvl == LEVEL_DAM || lvl == LEVEL_THEATRE || lvl == LEVEL_WHEEL || lvl == LEVEL_REDWOOD || lvl == LEVEL_BALLOON || lvl == LEVEL_CANAL || lvl == LEVEL_SILO || lvl == LEVEL_ORGAN || lvl == LEVEL_HYPO || lvl == LEVEL_FORT || lvl == LEVEL_TRIUMPH || lvl == LEVEL_ORCHARD || lvl == LEVEL_LOOM || lvl == LEVEL_SAVANNA || lvl == LEVEL_MOSQUE || lvl == LEVEL_TOTEM || lvl == LEVEL_OASIS || lvl == LEVEL_PAGODA || lvl == LEVEL_STEPWELL || lvl == LEVEL_JANTAR || lvl == LEVEL_TERRACOTTA || lvl == LEVEL_BALLCOURT || lvl == LEVEL_PETRA || lvl == LEVEL_BAZAAR || lvl == LEVEL_SIEGE || lvl == LEVEL_WHALING || lvl == LEVEL_CACTUS || lvl == LEVEL_ZIMBABWE || lvl == LEVEL_BASIL || lvl == LEVEL_PRINT || lvl == LEVEL_GER || lvl == LEVEL_ALCHEMY || lvl == LEVEL_BATHS || lvl == LEVEL_FLOAT || lvl == LEVEL_ISHTAR || lvl == LEVEL_TANNERY || lvl == LEVEL_MUSEUM || lvl == LEVEL_GOMPA || lvl == LEVEL_BUDDHA || lvl == LEVEL_ANGKOR || lvl == LEVEL_BADGIR || lvl == LEVEL_TOPIARY || lvl == LEVEL_GLASSWORKS || lvl == LEVEL_SHIPYARD || lvl == LEVEL_GOTHIC || lvl == LEVEL_PUEBLO);
         g_lit.load();
         arena::load(g_lit.shader);
         player.init(PLAYER_SPAWN); player.apply_shader(g_lit.shader);
-        boss.init(BOSS_SPAWN);     boss.apply_shader(g_lit.shader);
-        boss_targets   = { &boss.hurtbox };
+        if (mob_level) {
+            mobs::spawn(g_lit.shader);
+            boss_targets = mobs::targets();        // the player strikes the Hollows
+        } else {
+            boss.init(BOSS_SPAWN); boss.apply_shader(g_lit.shader);
+            boss_targets = { &boss.hurtbox };
+        }
         player_targets = { &player.hurtbox };
         player.autopilot = auto_demo;
         g_game.set_state(Game::TITLE);
         level_loaded = true;
+
+        // Blood-Moon opens resting at a bonfire; other levels start straight in.
+        intro = (lvl == LEVEL_BLOODMOON && !auto_demo) ? INTRO_SIT : INTRO_NONE;
+        intro_t = 0.0f;
+        if (intro == INTRO_SIT) player.play_clip("sitting_idle");   // hold the seated pose
     };
     auto unload_level = [&]() {
         if (!level_loaded) return;
-        player.unload(); boss.unload();
+        player.unload();
+        if (mob_level) mobs::unload(); else boss.unload();
         arena::unload(); g_lit.unload();
         level_loaded = false;
     };
@@ -224,7 +361,7 @@ int main(int argc, char** argv) {
         // -------------------------------------------------------- PLAY
         g_juice.update(real_dt);
 
-        if (IsKeyPressed(KEY_ESCAPE)) {
+        if (IsKeyPressed(KEY_ESCAPE) && intro == INTRO_NONE) {
             if (!(g_game.state == Game::DEAD || g_game.state == Game::VICTORY)) {
                 paused = !paused;
                 g_game.paused = paused;
@@ -234,24 +371,63 @@ int main(int argc, char** argv) {
         }
 
         bool near_bonfire = false;
-        if (!paused) {
+        if (intro != INTRO_NONE) {
+            // -------------------------------------------------- BONFIRE INTRO
+            intro_t += real_dt;
+            g_audio.fire_on();
+            player.anim_tick(real_dt);   // advance the seated / rising clip only
+            if (intro == INTRO_SIT) {
+                // ease into an over-the-shoulder two-shot of the player + fire
+                Vector3 cp{ 1.5f, 1.2f, 17.7f };    // camera: behind-right, slightly raised
+                Vector3 ct{ 0.0f, 0.7f, 15.0f };    // look past the player toward the bonfire
+                float k = Clamp(2.5f * real_dt, 0.0f, 1.0f);
+                player.camera.position = Vector3Lerp(player.camera.position, cp, k);
+                player.camera.target   = Vector3Lerp(player.camera.target, ct, k);
+                bool pressed = GetKeyPressed() != 0 ||
+                               IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||
+                               IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
+                if (intro_t > 0.6f && pressed) {     // player chooses to rise
+                    intro = INTRO_STAND; intro_t = 0.0f;
+                    stand_cam0 = player.camera.position;
+                    stand_tgt0 = player.camera.target;
+                    player.play_clip_once("crouch_to_standing_idle");
+                }
+            } else {   // INTRO_STAND: rise and pan out to the normal third-person rig
+                Vector3 pivot = player.pos + Vector3{ 0, 1.5f, 0 };
+                Vector3 gp = pivot + Vector3{ 0, 0, 1 } * (2.0f * cosf(0.2f)) +
+                             Vector3{ 0, 2.0f * sinf(0.2f), 0 };
+                float k = Clamp(intro_t / 1.2f, 0.0f, 1.0f);
+                float s = k * k * (3.0f - 2.0f * k);   // smoothstep ease-out
+                player.camera.position = Vector3Lerp(stand_cam0, gp, s);
+                player.camera.target   = Vector3Lerp(stand_tgt0, pivot, s);
+                if (k >= 1.0f) {                       // hand off to normal play
+                    intro = INTRO_NONE;
+                    g_audio.fire_off();
+                    player.play_clip("standing_idle");
+                }
+            }
+        } else if (!paused) {
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !IsCursorHidden()) DisableCursor();
 
             player.handle_input();
             float dt = real_dt * g_juice.time_scale();
             player.update(dt, boss_targets);
-            boss.update(dt, player_targets);
-
-            // body-vs-body separation (player can't overlap the boss)
-            Vector3 d = player.pos - boss.pos; d.y = 0;
-            float dist = Vector3Length(d);
-            float mind = 0.4f + 0.45f;
-            if (dist < mind && dist > 0.0001f) {
-                Vector3 push = Vector3Scale(Vector3Normalize(d), (mind - dist) * 0.5f);
-                player.pos = player.pos + push;
-                boss.pos = boss.pos - push;
-                arena::resolve(player.pos, 0.4f);
-                arena::resolve(boss.pos, 0.45f);
+            if (mob_level) {
+                // the horde drives its own AI + player/mob separation + lock-on + victory
+                mobs::update(dt, player_targets, player.pos, 0.4f);
+            } else {
+                boss.update(dt, player_targets);
+                // body-vs-body separation (player can't overlap the boss)
+                Vector3 d = player.pos - boss.pos; d.y = 0;
+                float dist = Vector3Length(d);
+                float mind = 0.4f + 0.45f;
+                if (dist < mind && dist > 0.0001f) {
+                    Vector3 push = Vector3Scale(Vector3Normalize(d), (mind - dist) * 0.5f);
+                    player.pos = player.pos + push;
+                    boss.pos = boss.pos - push;
+                    arena::resolve(player.pos, 0.4f);
+                    arena::resolve(boss.pos, 0.45f);
+                }
             }
 
             arena::update(dt);
@@ -297,7 +473,7 @@ int main(int argc, char** argv) {
                 rlDisableBackfaceCulling();   // mirror flips winding -> draw reflected geo unculled
                 arena::draw_world(mcam);
                 player.draw();                // reflect the fighters in the water too
-                boss.draw();
+                if (mob_level) mobs::draw(); else boss.draw();
                 g_fx.draw(mcam);              // and the blood/spark VFX
                 rlEnableBackfaceCulling();
             EndMode3D();
@@ -312,14 +488,19 @@ int main(int argc, char** argv) {
             arena::draw_sky(player.camera);
             arena::draw_world(player.camera);
             player.draw();
-            boss.draw();
+            if (mob_level) mobs::draw(); else boss.draw();
             arena::draw_water(player.camera, reflect.texture, screen);
             g_fx.draw(player.camera);
             if (bonfire_lit) draw_bonfire(BONFIRE_POS, (float)GetTime());
+            if (intro != INTRO_NONE) draw_bonfire(INTRO_BONFIRE, (float)GetTime());
         EndMode3D();
 
-        hud.draw();
-        screens.draw();
+        if (intro == INTRO_NONE) { hud.draw(); screens.draw(); }
+        if (intro == INTRO_SIT && !paused) {                 // cinematic rise prompt
+            int sw = GetScreenWidth(), sh = GetScreenHeight();
+            const char* msg = "Press any key to rise";
+            DrawText(msg, sw / 2 - MeasureText(msg, 24) / 2, sh - 90, 24, Color{ 255, 200, 120, 230 });
+        }
         if (bonfire_lit && !paused) {                        // bonfire rest hint
             int sw = GetScreenWidth(), sh = GetScreenHeight();
             const char* msg = near_bonfire ? "Press  E  to rest at the bonfire"

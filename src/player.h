@@ -36,6 +36,14 @@ public:
     void set_mouse_sensitivity(float v) { mouse_sensitivity = v; }
     float get_mouse_sensitivity() const { return mouse_sensitivity; }
 
+    // --- cinematic-intro hooks: drive the model directly, bypassing the FSM ---
+    void play_clip(const std::string& name) { anim.set_anim(name); }       // looping hold
+    void play_clip_once(const std::string& name) { anim.play_once(name); } // one-shot
+    bool anim_finished() const { return anim.finished(); }
+    void anim_tick(float dt) { anim.update(dt); }                          // advance only
+    void set_facing(float yaw) { visual_yaw = target_yaw = yaw; }
+    float facing() const { return visual_yaw; }
+
     Camera3D camera{};
     Hurtbox hurtbox;
     Hitbox  hitbox;

@@ -23,13 +23,17 @@ void AudioSys::init() {
     }
     std::string amb = assets::path("audio/music/ambient.wav");
     std::string fgt = assets::path("audio/music/fight.wav");
+    std::string fir = assets::path("audio/sfx/fire.wav");
     if (FileExists(amb.c_str())) { ambient = LoadMusicStream(amb.c_str()); ambient.looping = true; has_ambient = true; }
     if (FileExists(fgt.c_str())) { fight = LoadMusicStream(fgt.c_str()); fight.looping = true; has_fight = true; }
+    if (FileExists(fir.c_str())) { fire = LoadMusicStream(fir.c_str()); fire.looping = true; has_fire = true; }
 
     amb_db = amb_target_db = -7.0f;
     fight_db = fight_target_db = -60.0f;
+    fire_db = fire_target_db = -60.0f;
     if (has_ambient) { SetMusicVolume(ambient, db_to_lin(amb_db)); PlayMusicStream(ambient); }
     if (has_fight)   { SetMusicVolume(fight, db_to_lin(fight_db)); PlayMusicStream(fight); }
+    if (has_fire)    { SetMusicVolume(fire, db_to_lin(fire_db)); PlayMusicStream(fire); }
 
     g_events.hit_landed.connect([this](Actor*, float) { play("hit", 0.10f, -2.0f); });
     g_events.boss_aggro.connect([this]() { play("roar", 0.05f, 0.0f, 0.95f); });
@@ -39,11 +43,14 @@ void AudioSys::init() {
 void AudioSys::update(float dt) {
     if (has_ambient) UpdateMusicStream(ambient);
     if (has_fight)   UpdateMusicStream(fight);
+    if (has_fire)    UpdateMusicStream(fire);
     // constant-rate dB ramp (matches audio.gd move_toward at 40 dB/s)
     amb_db   = move_toward(amb_db, amb_target_db, 40.0f * dt);
     fight_db = move_toward(fight_db, fight_target_db, 40.0f * dt);
+    fire_db  = move_toward(fire_db, fire_target_db, 40.0f * dt);
     if (has_ambient) SetMusicVolume(ambient, db_to_lin(amb_db) * music * master);
     if (has_fight)   SetMusicVolume(fight, db_to_lin(fight_db) * music * master);
+    if (has_fire)    SetMusicVolume(fire, db_to_lin(fire_db) * sfx_vol * master);
 }
 
 void AudioSys::play(const std::string& name, float pitch_var, float vol_db, float base_pitch) {
@@ -75,4 +82,5 @@ void AudioSys::shutdown() {
     sfx.clear();
     if (has_ambient) UnloadMusicStream(ambient);
     if (has_fight)   UnloadMusicStream(fight);
+    if (has_fire)    UnloadMusicStream(fire);
 }
